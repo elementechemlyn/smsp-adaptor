@@ -2,7 +2,7 @@ In this directory
 
 mvn install 
 
-docker build . -t sds-adaptor
+docker build . -t smsp-adaptor
 
 docker tag smsp-adaptor thorlogic/smsp-adaptor
 
