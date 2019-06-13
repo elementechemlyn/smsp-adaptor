@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot-version>2.1.1.RELEASE</spring-boot-version>
+        <spring-boot-version>2.1.4.RELEASE</spring-boot-version>
         <hapi-fhir-version>3.8.0</hapi-fhir-version>
         <care-connect-version>3.5.4</care-connect-version>
         <camel-version>2.24.0</camel-version>
@@ -120,6 +120,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-core</artifactId>
         </dependency>
 
         <!-- JDK 11 inlcudes -->
@@ -273,7 +278,17 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>com.helger.maven</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <wsdlDirectory>${basedir}/src/main/xsd/wsdl</wsdlDirectory>
+                    <keep>true</keep>
+                    <sourceDestDir>${basedir}/src/main/java</sourceDestDir>
+                    <packageName>uk.gov.hscic.schema</packageName>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
