@@ -60,10 +60,7 @@ public class RestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
             setServerAddressStrategy(new HardcodedServerAddressStrategy(serverAddress));
         }
         List<IResourceProvider> resourceProviders = new ArrayList<>();
-        resourceProviders.add(appCtx.getBean(PractitionerResourceProvider.class));
-        resourceProviders.add(appCtx.getBean(PractitionerRoleResourceProvider.class));
-        resourceProviders.add(appCtx.getBean(EndpointResourceProvider.class));
-        resourceProviders.add(appCtx.getBean(OrganizationResourceProvider.class));
+        resourceProviders.add(appCtx.getBean(PatientResourceProvider.class));
 
         setFhirContext(appCtx.getBean(FhirContext.class));
 
