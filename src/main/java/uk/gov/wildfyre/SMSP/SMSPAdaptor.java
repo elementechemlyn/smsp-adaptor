@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP;
+package uk.gov.wildfyre.SMSP;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import uk.gov.fhir.SMSP.support.CorsFilter;
+import uk.gov.wildfyre.SMSP.support.CorsFilter;
 
 @SpringBootApplication
 public class SMSPAdaptor {

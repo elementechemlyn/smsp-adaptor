@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP.providers;
+package uk.gov.wildfyre.SMSP.providers;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 

@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP.support;
+package uk.gov.wildfyre.SMSP.support;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

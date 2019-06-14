@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP;
+package uk.gov.wildfyre.SMSP;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;

@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP.providers;
+package uk.gov.wildfyre.SMSP.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.fhir.SMSP.dao.PatientDaoImpl;
+import uk.gov.wildfyre.SMSP.dao.PatientDaoImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

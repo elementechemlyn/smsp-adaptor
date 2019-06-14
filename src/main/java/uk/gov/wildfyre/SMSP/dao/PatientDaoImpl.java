@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP.dao;
+package uk.gov.wildfyre.SMSP.dao;
 
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;

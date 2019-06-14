@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP.support;
+package uk.gov.wildfyre.SMSP.support;
 
 
 import ca.uhn.fhir.rest.server.exceptions.*;

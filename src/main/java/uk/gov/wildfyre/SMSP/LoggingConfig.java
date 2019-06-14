@@ -1,4 +1,4 @@
-package uk.gov.fhir.SMSP;
+package uk.gov.wildfyre.SMSP;
 
 import org.springframework.context.annotation.Configuration;
 
