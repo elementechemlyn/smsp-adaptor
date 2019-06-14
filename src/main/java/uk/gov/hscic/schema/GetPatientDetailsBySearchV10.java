@@ -17,7 +17,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "getPatientDetailsBySearch-v1-0", targetNamespace = "urn:nhs-itk:ns:201005", wsdlLocation = "file:/Development/DWP/smsp-adaptor/src/main/xsd/wsdl/PDSMiniServices-v1-0.wsdl")
+@WebServiceClient(name = "getPatientDetailsBySearch-v1-0", targetNamespace = "urn:nhs-itk:ns:201005", wsdlLocation = "file:/Development/wildfyre/smsp-adaptor/src/main/xsd/wsdl/PDSMiniServices-v1-0.wsdl")
 public class GetPatientDetailsBySearchV10
     extends Service
 {
@@ -30,7 +30,7 @@ public class GetPatientDetailsBySearchV10
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("file:/Development/DWP/smsp-adaptor/src/main/xsd/wsdl/PDSMiniServices-v1-0.wsdl");
+            url = new URL("file:/Development/wildfyre/smsp-adaptor/src/main/xsd/wsdl/PDSMiniServices-v1-0.wsdl");
         } catch (MalformedURLException ex) {
             e = new WebServiceException(ex);
         }
