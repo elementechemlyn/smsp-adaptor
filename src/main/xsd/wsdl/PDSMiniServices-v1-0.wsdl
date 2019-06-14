@@ -114,7 +114,6 @@
 			<wsdl:output>
 				<soap:body parts="verifyNHSNumberResponse-v1-0" use="literal"/>
 			</wsdl:output>
-			<wsdl:fault name="standardFault"/>
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:binding name="getNHSNumber-v1-0_pttBinding" type="itk:getNHSNumber-v1-0_ptt">
@@ -127,7 +126,6 @@
 			<wsdl:output>
 				<soap:body parts="getNHSNumberResponse-v1-0" use="literal"/>
 			</wsdl:output>
-			<wsdl:fault name="standardFault"/>
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:binding name="getPatientDetailsByNHSNumber-v1-0_pttBinding" type="itk:getPatientDetailsByNHSNumber-v1-0_ptt">
@@ -140,7 +138,6 @@
 			<wsdl:output>
 				<soap:body parts="getPatientDetailsResponse-v1-0" use="literal"/>
 			</wsdl:output>
-			<wsdl:fault name="standardFault"/>
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:binding name="getPatientDetailsBySearch-v1-0_pttBinding" type="itk:getPatientDetailsBySearch-v1-0_ptt">
@@ -153,7 +150,6 @@
 			<wsdl:output>
 				<soap:body parts="getPatientDetailsResponse-v1-0" use="literal"/>
 			</wsdl:output>
-			<wsdl:fault name="standardFault"/>
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:binding name="getPatientDetails-v1-0_pttBinding" type="itk:getPatientDetails-v1-0_ptt">
@@ -166,7 +162,6 @@
 			<wsdl:output>
 				<soap:body parts="getPatientDetailsResponse-v1-0" use="literal"/>
 			</wsdl:output>
-			<wsdl:fault name="standardFault"/>
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:service name="verifyNHSNumber-v1-0">
