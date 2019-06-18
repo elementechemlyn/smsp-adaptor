@@ -15,9 +15,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import uk.gov.wildfyre.SMSP.support.CorsFilter;
 
 @SpringBootApplication
+@EnableSwagger2
 public class SMSPAdaptor {
 
     @Autowired
@@ -30,6 +32,7 @@ public class SMSPAdaptor {
         System.setProperty("hawtio.authenticationEnabled", "false");
         System.setProperty("management.security.enabled","false");
         System.setProperty("management.contextPath","");
+
         SpringApplication.run(SMSPAdaptor.class, args);
 
     }

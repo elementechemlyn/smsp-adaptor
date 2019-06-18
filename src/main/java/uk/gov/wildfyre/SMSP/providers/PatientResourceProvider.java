@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -49,12 +50,12 @@ public class PatientResourceProvider implements IResourceProvider {
 
     @Search
     public List<Patient> search(HttpServletRequest request,
-                                     @OptionalParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
-                                     @OptionalParam(name = Patient.SP_FAMILY) StringParam surname,
-                                     @OptionalParam(name = Patient.SP_NAME) StringParam name
+                                @OptionalParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
+                                @OptionalParam(name = Patient.SP_BIRTHDATE) DateParam dob,
+                                @OptionalParam(name = Patient.SP_NAME) StringParam name
     ) throws Exception {
 
-        return patientDao.search(identifier, surname, name);
+        return patientDao.search(identifier, dob);
     }
 
 
