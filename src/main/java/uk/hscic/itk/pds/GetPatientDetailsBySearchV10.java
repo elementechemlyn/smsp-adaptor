@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  *
  */
 @WebServiceClient(name = "getPatientDetailsBySearch-v1-0",
-                  wsdlLocation = "file:/C:/Development/DWP/smsp-adaptor/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl",
+                  wsdlLocation = "wsdl/PDSMiniServices-v1-0.wsdl",
                   targetNamespace = "urn:nhs-itk:ns:201005")
 public class GetPatientDetailsBySearchV10 extends Service {
 
@@ -26,11 +26,11 @@ public class GetPatientDetailsBySearchV10 extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("file:/C:/Development/DWP/smsp-adaptor/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl");
+            url = new URL("wsdl/PDSMiniServices-v1-0.wsdl");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(GetPatientDetailsBySearchV10.class.getName())
                 .log(java.util.logging.Level.INFO,
-                     "Can not initialize the default wsdl from {0}", "file:/C:/Development/DWP/smsp-adaptor/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl");
+                     "Can not initialize the default wsdl from {0}", "wsdl/PDSMiniServices-v1-0.wsdl");
         }
         WSDL_LOCATION = url;
     }

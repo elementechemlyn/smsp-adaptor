@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.wildfyre.SMSP.dao.PatientDaoImpl;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.Socket;
 import java.util.List;
 
 
@@ -57,16 +58,26 @@ public class PatientResourceProvider implements IResourceProvider {
         return patientDao.search(identifier, dob);
     }
 
-
-    @Operation(name = "$poke", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
-    public MethodOutcome refresh() throws Exception {
-
-        patientDao.poke();
-
-        MethodOutcome retVal = new MethodOutcome();
-        return retVal;
-
+    @Operation(name = "$verifyNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome getValueCodes(
+    ) throws Exception {
+        return patientDao.verifyNHSNumber();
     }
+
+    /*
+    @Operation(name = "$nhsNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome getValueCodes(
+            @OperationParam(name="id") TokenParam valueSetId,
+            @OperationParam(name="query") ReferenceParam valueSetQuery
+
+    ) throws Exception {
+        return null;
+    }
+
+     */
+
+
+
 
 
 }

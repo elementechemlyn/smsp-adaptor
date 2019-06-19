@@ -17,13 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import uk.gov.wildfyre.SMSP.support.CorsFilter;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.InputStream;
-import java.security.KeyStore;
+import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
 
 @SpringBootApplication
 @EnableSwagger2
@@ -68,7 +62,16 @@ public class SMSPAdaptor {
 
 
     @Bean
-    public SSLContext SSLConext() throws Exception {
+    public SpineSecuritySocketFactory spineSecurityContext() throws Exception
+    {
+        SpineSecuritySocketFactory spineSecuritySocketFactory = new SpineSecuritySocketFactory();
+
+        return spineSecuritySocketFactory;
+    }
+
+
+
+    /*
         SSLContext sc = SSLContext.getInstance("SSLv3");
 
         KeyManagerFactory kmf =
@@ -79,37 +82,15 @@ public class SMSPAdaptor {
 
         kmf.init(ks, "fhirsmsp".toCharArray());
 
-        TrustManagerFactory
-                tmfactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmfactory.init(getTrustStore());
-        TrustManager[] trustManagers = tmfactory.getTrustManagers();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(ks);
 
-        sc.init(kmf.getKeyManagers(),trustManagers , null);
+        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
         return sc;
     }
+*/
 
-    private KeyStore getTrustStore () throws Exception {
-        KeyManagerFactory kmf =
-                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(getResourceAsStream("trust.jks"), "fhirsmsp".toCharArray());
-
-        kmf.init(ks, "fhirsmsp".toCharArray());
-        return  ks;
-    }
-
-    private ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
-
-    private InputStream getResourceAsStream(String resource) {
-        final InputStream in
-                = getContextClassLoader().getResourceAsStream(resource);
-
-        return in == null ? getClass().getResourceAsStream(resource) : in;
-    }
 
     @Bean
     public FilterRegistrationBean corsFilter() {

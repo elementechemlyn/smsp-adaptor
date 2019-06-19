@@ -15,7 +15,7 @@ import javax.xml.ws.Service;
  *
  */
 @WebServiceClient(name = "verifyNHSNumber-v1-0",
-                  wsdlLocation = "file:/C:/Development/DWP/smsp-adaptor/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl",
+                  wsdlLocation = "wsdl/PDSMiniServices-v1-0.wsdl",
                   targetNamespace = "urn:nhs-itk:ns:201005")
 public class VerifyNHSNumberV10 extends Service {
 
@@ -23,14 +23,15 @@ public class VerifyNHSNumberV10 extends Service {
 
     public final static QName SERVICE = new QName("urn:nhs-itk:ns:201005", "verifyNHSNumber-v1-0");
     public final static QName VerifyNHSNumberV10PttPort = new QName("urn:nhs-itk:ns:201005", "verifyNHSNumber-v1-0_pttPort");
+
     static {
         URL url = null;
         try {
-            url = new URL("file:/C:/Development/DWP/smsp-adaptor/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl");
+            url = new URL("/wsdl/PDSMiniServices-v1-0.wsdl");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(VerifyNHSNumberV10.class.getName())
                 .log(java.util.logging.Level.INFO,
-                     "Can not initialize the default wsdl from {0}", "file:/C:/Development/DWP/smsp-adaptor/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl");
+                     "Can not initialize the default wsdl from {0}", "/wsdl/PDSMiniServices-v1-0.wsdl");
         }
         WSDL_LOCATION = url;
     }
