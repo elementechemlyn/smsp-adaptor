@@ -70,7 +70,8 @@ public class HapiProperties {
     static final String SECURITY_OAUTH_SCOPE = "security.oauth2.scope";
     static final String SECURITY_SMART_SCOPE = "security.oauth2.smart";
 
-    static final String NHS_SERVER = "nhs.address";
+    static final String NHS_SERVER_URL = "nhs.address.url";
+    static final String NHS_SERVER_ADDRESS = "nhs.address.base";
    
     static final String NHS_ASID_FROM = "nhs.ASIDfrom";
     static final String NHS_ASID_TO = "nhs.ASIDto";
@@ -441,8 +442,12 @@ public class HapiProperties {
     }
 
 
-    public static String getNhsServer() {
-        return HapiProperties.getProperty(NHS_SERVER);
+    public static String getNhsServerUrl() {
+        return HapiProperties.getProperty(NHS_SERVER_URL);
+    }
+
+    public static String getNhsServerAddress() {
+        return HapiProperties.getProperty(NHS_SERVER_ADDRESS);
     }
 
     public static String getNhsAsidFrom() {

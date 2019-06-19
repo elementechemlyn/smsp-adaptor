@@ -17,14 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import uk.gov.wildfyre.SMSP.support.CorsFilter;
-import uk.gov.wildfyre.SMSP.support.SpineSecurityContext;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.InputStream;
-import java.security.KeyStore;
+import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
 
 @SpringBootApplication
 @EnableSwagger2
@@ -69,10 +62,14 @@ public class SMSPAdaptor {
 
 
     @Bean
-    public SpineSecurityContext spineSecurityContext() throws Exception
+    public SpineSecuritySocketFactory spineSecurityContext() throws Exception
     {
-        return new SpineSecurityContext();
+        SpineSecuritySocketFactory spineSecuritySocketFactory = new SpineSecuritySocketFactory();
+
+        return spineSecuritySocketFactory;
     }
+
+
 
     /*
         SSLContext sc = SSLContext.getInstance("SSLv3");

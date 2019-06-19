@@ -16,6 +16,7 @@
 
 package uk.gov.wildfyre.SMSP.support;
 
+import uk.gov.wildfyre.SMSP.HapiProperties;
 import uk.gov.wildfyre.SMSP.SpineProperties;
 
 import javax.net.ssl.*;
@@ -54,7 +55,7 @@ import java.util.Properties;
  * 
  * @author Damian Murphy <murff@warlock.org>
  */
-public class SpineSecurityContext 
+public class SpineSecuritySocketFactory
     extends javax.net.SocketFactory
 {    
     private static SSLContext context = null;
@@ -70,7 +71,7 @@ public class SpineSecurityContext
      * Constructor which will get configuration properties from System.properties
      * @throws Exception 
      */
-    public SpineSecurityContext()
+    public SpineSecuritySocketFactory()
             throws Exception
     {
         init();
@@ -82,7 +83,7 @@ public class SpineSecurityContext
      * @param p
      * @throws Exception 
      */
-    public SpineSecurityContext(Properties p)
+    public SpineSecuritySocketFactory(Properties p)
             throws Exception
     {
        
@@ -100,7 +101,13 @@ public class SpineSecurityContext
         try {
             String trst = SpineProperties.getUSESSLTRUST();
             if (trst == null) {
-                return;
+                if (SpineProperties.getTRUSTPASS() != null && !SpineProperties.getTRUSTPASS().isEmpty()) {
+                    trustStore = KeyStore.getInstance("jks");
+                    trustStore.load(getResourceAsStream("cacerts.jks"), SpineProperties.getSSLPASS().toCharArray());
+                    return;
+                } else {
+                    return;
+                }
             }
             String tp = SpineProperties.getTRUSTPASS();
             if (tp == null) tp = "changeit";
@@ -135,7 +142,7 @@ public class SpineSecurityContext
             if (p == null) p = "";
             keyStore = KeyStore.getInstance("jks");
             if (ksf == null || ksf.isEmpty()) {
-                keyStore.load(getResourceAsStream("cacerts.jks"), "fhirsmsp".toCharArray());
+                keyStore.load(getResourceAsStream("cacerts.jks"), SpineProperties.getSSLPASS().toCharArray());
             } else {
                 FileInputStream fis = new FileInputStream(ksf);
                 keyStore.load(fis, p.toCharArray());
@@ -183,9 +190,34 @@ public class SpineSecurityContext
             if (trustStore == null) {
                 context.init(kmf.getKeyManagers(), null, new SecureRandom());            
             } else {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()); 
-                tmf.init(trustStore);
-                context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());            
+                TrustManagerFactory tmf = null;
+                if (HapiProperties.getNhsServerAddress().equals("192.168.128.11")) {
+
+                    // WARNING THIS IS NOT TO BE USED ON REAL LINKS
+                    TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }
+                    };
+                    context.init(kmf.getKeyManagers(), trustAllCerts, new SecureRandom());
+                    HostnameVerifier allHostsValid = new HostnameVerifier() {
+                        public boolean verify(String hostname, SSLSession session) {
+                            return true;
+                        }
+                    };
+                    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+                    // END OF WARNING
+                } else {
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    tmf.init(trustStore);
+                    context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+                }
             }
             ready = true;
         }
@@ -291,7 +323,7 @@ public class SpineSecurityContext
     
    public static javax.net.SocketFactory getDefault() {
        try {
-        return new SpineSecurityContext();
+        return new SpineSecuritySocketFactory();
        }
        catch (Exception e) {
            e.printStackTrace();

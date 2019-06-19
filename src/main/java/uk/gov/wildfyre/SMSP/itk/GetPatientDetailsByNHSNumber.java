@@ -44,12 +44,12 @@ public class GetPatientDetailsByNHSNumber {
 
         URL wsdlURL = GetPatientDetailsByNHSNumberV10.WSDL_LOCATION;
 
-            File wsdlFile = new File(HapiProperties.getNhsServer());
+            File wsdlFile = new File(HapiProperties.getNhsServerUrl());
             try {
                 if (wsdlFile.exists()) {
                     wsdlURL = wsdlFile.toURI().toURL();
                 } else {
-                    wsdlURL = new URL(HapiProperties.getNhsServer());
+                    wsdlURL = new URL(HapiProperties.getNhsServerUrl());
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();

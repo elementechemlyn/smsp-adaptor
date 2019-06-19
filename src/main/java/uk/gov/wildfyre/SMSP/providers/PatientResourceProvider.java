@@ -1,10 +1,9 @@
 package uk.gov.wildfyre.SMSP.providers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.wildfyre.SMSP.dao.PatientDaoImpl;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.Socket;
 import java.util.List;
 
 
@@ -57,6 +57,24 @@ public class PatientResourceProvider implements IResourceProvider {
 
         return patientDao.search(identifier, dob);
     }
+
+    @Operation(name = "$verifyNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome getValueCodes(
+    ) throws Exception {
+        return patientDao.verifyNHSNumber();
+    }
+
+    /*
+    @Operation(name = "$nhsNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome getValueCodes(
+            @OperationParam(name="id") TokenParam valueSetId,
+            @OperationParam(name="query") ReferenceParam valueSetQuery
+
+    ) throws Exception {
+        return null;
+    }
+
+     */
 
 
 }
