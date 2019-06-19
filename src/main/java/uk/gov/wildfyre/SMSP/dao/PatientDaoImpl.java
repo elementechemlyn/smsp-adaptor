@@ -1,13 +1,13 @@
 package uk.gov.wildfyre.SMSP.dao;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.StringParam;
+
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import uk.gov.wildfyre.SMSP.itk.GetNHSNumber;
 import uk.gov.wildfyre.SMSP.itk.GetPatientDetailsByNHSNumber;
 
 import java.util.ArrayList;
@@ -33,6 +33,13 @@ public class PatientDaoImpl {
 
 
      */
+
+    public MethodOutcome poke() {
+
+        SSLPoke sslPoke = new SSLPoke();
+        sslPoke.test();
+        return null;
+    }
 
     public List<Patient> search(TokenParam identifier,
                                 DateParam dob) throws Exception {

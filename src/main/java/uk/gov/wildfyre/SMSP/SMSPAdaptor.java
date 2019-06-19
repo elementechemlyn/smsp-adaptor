@@ -20,6 +20,8 @@ import uk.gov.wildfyre.SMSP.support.CorsFilter;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 
@@ -77,9 +79,25 @@ public class SMSPAdaptor {
 
         kmf.init(ks, "fhirsmsp".toCharArray());
 
-        sc.init(kmf.getKeyManagers(), null, null);
+        TrustManagerFactory
+                tmfactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmfactory.init(getTrustStore());
+        TrustManager[] trustManagers = tmfactory.getTrustManagers();
+
+        sc.init(kmf.getKeyManagers(),trustManagers , null);
 
         return sc;
+    }
+
+    private KeyStore getTrustStore () throws Exception {
+        KeyManagerFactory kmf =
+                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        ks.load(getResourceAsStream("trust.jks"), "fhirsmsp".toCharArray());
+
+        kmf.init(ks, "fhirsmsp".toCharArray());
+        return  ks;
     }
 
     private ClassLoader getContextClassLoader() {

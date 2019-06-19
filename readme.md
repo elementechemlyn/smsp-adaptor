@@ -17,7 +17,7 @@ https://stackoverflow.com/questions/32051596/exception-unable-to-validate-certif
 
 openssl s_client -connect 192.168.128.11:443 < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > public.crt
 
-keytool -import -alias SMSPSRVR -keystore cacerts.jks -file public.crt
+keytool -import -v -trustcacerts -alias SMSPSRVR -keystore trust.jks -file public.crt
 
 
 In this directory

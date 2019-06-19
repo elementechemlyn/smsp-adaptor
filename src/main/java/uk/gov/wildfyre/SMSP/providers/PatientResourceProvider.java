@@ -1,10 +1,9 @@
 package uk.gov.wildfyre.SMSP.providers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -56,6 +55,17 @@ public class PatientResourceProvider implements IResourceProvider {
     ) throws Exception {
 
         return patientDao.search(identifier, dob);
+    }
+
+
+    @Operation(name = "$poke", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome refresh() throws Exception {
+
+        patientDao.poke();
+
+        MethodOutcome retVal = new MethodOutcome();
+        return retVal;
+
     }
 
 
