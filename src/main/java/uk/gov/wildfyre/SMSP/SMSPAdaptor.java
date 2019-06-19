@@ -17,9 +17,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import uk.gov.wildfyre.SMSP.support.CorsFilter;
+import uk.gov.wildfyre.SMSP.support.SpineSecurityContext;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 
@@ -66,7 +69,12 @@ public class SMSPAdaptor {
 
 
     @Bean
-    public SSLContext SSLConext() throws Exception {
+    public SpineSecurityContext spineSecurityContext() throws Exception
+    {
+        return new SpineSecurityContext();
+    }
+
+    /*
         SSLContext sc = SSLContext.getInstance("SSLv3");
 
         KeyManagerFactory kmf =
@@ -77,21 +85,15 @@ public class SMSPAdaptor {
 
         kmf.init(ks, "fhirsmsp".toCharArray());
 
-        sc.init(kmf.getKeyManagers(), null, null);
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(ks);
+
+        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
         return sc;
     }
+*/
 
-    private ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
-
-    private InputStream getResourceAsStream(String resource) {
-        final InputStream in
-                = getContextClassLoader().getResourceAsStream(resource);
-
-        return in == null ? getClass().getResourceAsStream(resource) : in;
-    }
 
     @Bean
     public FilterRegistrationBean corsFilter() {
