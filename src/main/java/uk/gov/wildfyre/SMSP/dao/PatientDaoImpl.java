@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.wildfyre.SMSP.HapiProperties;
 import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
 import uk.hscic.itk.pds.FaultResponse;
+import uk.hscic.itk.pds.GetNHSNumberV10;
 import uk.hscic.itk.pds.VerifyNHSNumberV10;
 import uk.hscic.itk.pds.VerifyNHSNumberV10Ptt;
 
@@ -76,25 +77,23 @@ public class PatientDaoImpl {
 
 
     public void wsVerifyNHSNumber() throws Exception {
-        URL wsdlURL = new URL(HapiProperties.getNhsServerUrl());
+        URL wsdlURL = VerifyNHSNumberV10.WSDL_LOCATION; //new URL(HapiProperties.getNhsServerUrl());
 
         VerifyNHSNumberV10 ss = new VerifyNHSNumberV10(wsdlURL, VERIFY_NHS_NUMBER_SERVICE_NAME);
-
-
 
         BindingProvider bindingProvider = (BindingProvider) ss;
         bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",spineSecurityContext);
         VerifyNHSNumberV10Ptt port = ss.getVerifyNHSNumberV10PttPort();
 
-        System.out.println("Invoking verifyNHSNumberV10...");
+        log.info("Invoking verifyNHSNumberV10...");
         uk.hscic.itk.pds.DistributionEnvelopeType _verifyNHSNumberV10_verifyNHSNumberRequestV10 = null;
         try {
             uk.hscic.itk.pds.DistributionEnvelopeType _verifyNHSNumberV10__return = port.verifyNHSNumberV10(_verifyNHSNumberV10_verifyNHSNumberRequestV10);
-            System.out.println("verifyNHSNumberV10.result=" + _verifyNHSNumberV10__return);
+            log.info("verifyNHSNumberV10.result=" + _verifyNHSNumberV10__return);
 
         } catch (FaultResponse e) {
-            System.out.println("Expected exception: faultResponse has occurred.");
-            System.out.println(e.toString());
+            log.error("Expected exception: faultResponse has occurred.");
+            log.error(e.toString());
         }
 
     }
