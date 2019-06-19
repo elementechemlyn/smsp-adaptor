@@ -106,12 +106,14 @@ public class SpineSecuritySocketFactory
         try {
             String trst = SpineProperties.getUSESSLTRUST();
             if (trst == null) {
-                log.info("setupTrustStore - Using cacerts.jks" );
+
                 if (SpineProperties.getTRUSTPASS() != null && !SpineProperties.getTRUSTPASS().isEmpty()) {
+                    log.info("setupTrustStore - Using cacerts.jks" );
                     trustStore = KeyStore.getInstance("jks");
                     trustStore.load(getResourceAsStream("cacerts.jks"), SpineProperties.getSSLPASS().toCharArray());
                     return;
                 } else {
+                    log.info("setupTrustStore - No keystore" );
                     return;
                 }
             }
