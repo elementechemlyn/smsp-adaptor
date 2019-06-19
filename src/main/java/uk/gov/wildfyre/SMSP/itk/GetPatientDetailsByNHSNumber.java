@@ -40,17 +40,7 @@ public class GetPatientDetailsByNHSNumber {
 
     public void callService() throws Exception {
 
-        SSLContext sc = SSLContext.getInstance("SSLv3");
 
-        KeyManagerFactory kmf =
-                KeyManagerFactory.getInstance( KeyManagerFactory.getDefaultAlgorithm() );
-
-        KeyStore ks = KeyStore.getInstance( KeyStore.getDefaultType() );
-        ks.load(new FileInputStream( "cacerts.jks" ), "fhirsmsp".toCharArray() );
-
-        kmf.init( ks, "fhirsmsp".toCharArray() );
-
-        sc.init( kmf.getKeyManagers(), null, null );
 
         URL wsdlURL = GetPatientDetailsByNHSNumberV10.WSDL_LOCATION;
 

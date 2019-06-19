@@ -88,14 +88,14 @@ public class OpenAPIService {
         info.put("title",HapiProperties.getServerName());
         info.put("description","A reference implementation of the "+HapiProperties.getServerName()+" which conforms to the <a href=\"https://nhsconnect.github.io/CareConnectAPI/\" target=\"_blank\">Care Connect API</a> ");
         info.put("termsOfService","http://swagger.io/terms/");
-        info.put("basePath","/STU3");
+        info.put("basePath",serverPath +"/STU3");
         info.put("schemes", new JSONArray().put("http"));
 
         JSONObject paths = new JSONObject();
         obj.put("paths",paths);
 
         JSONObject resObjC = new JSONObject();
-        paths.put("/STU3/metadata",resObjC);
+        paths.put(serverPath +"/STU3/metadata",resObjC);
         JSONObject opObjC = new JSONObject();
         resObjC.put("get",opObjC);
         opObjC.put("description","FHIR Server Capability Statement");
@@ -117,53 +117,53 @@ public class OpenAPIService {
                     JSONObject resObj = null;
                     switch (interactionComponent.getCode()) {
                         case READ:
-                            if (pathMap.containsKey("/STU3/"+resourceComponent.getType()+"/{id}")) {
-                                resObj = (JSONObject) pathMap.get("/STU3/"+resourceComponent.getType()+"/{id}");
+                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}")) {
+                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}");
                             } else {
                                 resObj = new JSONObject();
-                                pathMap.put("/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                                paths.put("/STU3/"+resourceComponent.getType()+"/{id}",resObj);
+                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
+                                paths.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
                             }
                             resObj.put("get",getId(resourceComponent, interactionComponent));
                             break;
-                        case DELETE:
-                            if (pathMap.containsKey("/STU3/"+resourceComponent.getType()+"/{id}")) {
-                                resObj = (JSONObject) pathMap.get("/STU3/"+resourceComponent.getType()+"/{id}");
-                            } else {
-                                resObj = new JSONObject();
-                                pathMap.put("/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                                paths.put("/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                            }
-                            resObj.put("delete",getId(resourceComponent, interactionComponent));
-                            break;
                         case SEARCHTYPE:
-                            if (pathMap.containsKey("/STU3/"+resourceComponent.getType())) {
-                                resObj = (JSONObject) pathMap.get("/STU3/"+resourceComponent.getType());
+                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType())) {
+                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType());
                             } else {
                                 resObj = new JSONObject();
-                                pathMap.put("/STU3/"+resourceComponent.getType(),resObj);
-                                paths.put("/STU3/"+resourceComponent.getType(),resObj);
+                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
+                                paths.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
                             }
                             resObj.put("get",getSearch(resourceComponent, interactionComponent));
                             break;
-                        case UPDATE:
-                            if (pathMap.containsKey("/STU3/"+resourceComponent.getType()+"/{id}")) {
-                                resObj = (JSONObject) pathMap.get("/STU3/"+resourceComponent.getType()+"/{id}");
+                        case DELETE:
+                            if (pathMap.containsKey(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}")) {
+                                resObj = (JSONObject) pathMap.get(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}");
                             } else {
                                 resObj = new JSONObject();
-                                pathMap.put("/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                                paths.put("/STU3/"+resourceComponent.getType()+"/{id}",resObj);
+                                pathMap.put(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}",resObj);
+                                paths.put(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}",resObj);
+                            }
+                            resObj.put("delete",getId(resourceComponent, interactionComponent));
+                            break;
+                        case UPDATE:
+                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}")) {
+                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}");
+                            } else {
+                                resObj = new JSONObject();
+                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
+                                paths.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
                             }
                             resObj.put("put",getId(resourceComponent, interactionComponent));
                             break;
                         case CREATE:
 
-                            if (pathMap.containsKey("/STU3/"+resourceComponent.getType())) {
-                                resObj = (JSONObject) pathMap.get("/STU3/"+resourceComponent.getType());
+                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType())) {
+                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType());
                             } else {
                                 resObj = new JSONObject();
-                                pathMap.put("/STU3/"+resourceComponent.getType(),resObj);
-                                paths.put("/STU3/"+resourceComponent.getType(),resObj);
+                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
+                                paths.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
                             }
 
                             resObj.put("post",getSearch(resourceComponent, interactionComponent));

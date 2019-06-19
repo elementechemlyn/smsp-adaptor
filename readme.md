@@ -11,6 +11,10 @@ openssl x509 -outform der -in certificate.pem -out certificate.der
 
 keytool -import -alias smsp -keystore cacerts.jks -file certificate.der
 
+Now need to import the servers certificate into the store to trust it
+
+https://stackoverflow.com/questions/32051596/exception-unable-to-validate-certificate-of-the-target-in-spring-mvc
+
 
 
 

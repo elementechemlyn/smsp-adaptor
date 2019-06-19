@@ -12,7 +12,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 
-import uk.gov.wildfyre.SMSP.support.ServerInterceptor;
+import uk.gov.wildfyre.SMSP.interceptors.ServerInterceptor;
 import uk.gov.wildfyre.SMSP.providers.ConformanceProvider;
 import uk.gov.wildfyre.SMSP.providers.PatientResourceProvider;
 

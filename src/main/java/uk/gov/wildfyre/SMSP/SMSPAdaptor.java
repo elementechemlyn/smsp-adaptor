@@ -18,6 +18,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import uk.gov.wildfyre.SMSP.support.CorsFilter;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import java.io.InputStream;
+import java.security.KeyStore;
+
 @SpringBootApplication
 @EnableSwagger2
 public class SMSPAdaptor {
@@ -30,8 +35,8 @@ public class SMSPAdaptor {
 
     public static void main(String[] args) {
         System.setProperty("hawtio.authenticationEnabled", "false");
-        System.setProperty("management.security.enabled","false");
-        System.setProperty("management.contextPath","");
+        System.setProperty("management.security.enabled", "false");
+        System.setProperty("management.contextPath", "");
 
         SpringApplication.run(SMSPAdaptor.class, args);
 
@@ -60,7 +65,33 @@ public class SMSPAdaptor {
     }
 
 
+    @Bean
+    public SSLContext SSLConext() throws Exception {
+        SSLContext sc = SSLContext.getInstance("SSLv3");
 
+        KeyManagerFactory kmf =
+                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        ks.load(getResourceAsStream("cacerts.jks"), "fhirsmsp".toCharArray());
+
+        kmf.init(ks, "fhirsmsp".toCharArray());
+
+        sc.init(kmf.getKeyManagers(), null, null);
+
+        return sc;
+    }
+
+    private ClassLoader getContextClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
+    private InputStream getResourceAsStream(String resource) {
+        final InputStream in
+                = getContextClassLoader().getResourceAsStream(resource);
+
+        return in == null ? getClass().getResourceAsStream(resource) : in;
+    }
 
     @Bean
     public FilterRegistrationBean corsFilter() {
