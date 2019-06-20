@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import uk.gov.wildfyre.SMSP.HapiProperties;
 import uk.gov.wildfyre.SMSP.support.SSLSocketFactoryGenerator;
 import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
@@ -19,10 +21,15 @@ import uk.hscic.itk.pds.VerifyNHSNumberV10Ptt;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.namespace.QName;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.BindingProvider;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,16 +96,59 @@ public class PatientDaoImpl {
         out.println(output);
         out.flush();
 
+
+        StringBuilder stringBuilder = new StringBuilder();
+
         BufferedReader
                 in = new BufferedReader(
                 new InputStreamReader(
                         socket.getInputStream()));
 
+
         String inputLine;
-        while ((inputLine = in.readLine()) != null)
-            System.out.println(inputLine);
+        Boolean headers = true;
+        while ((inputLine = in.readLine()) != null) {
+            if (headers) {
+                if (inputLine.isEmpty()) {
+                    headers = false;
+                } else {
+                    log.debug(inputLine);
+                }
+            } else {
+                stringBuilder.append(inputLine);
+            }
+        }
 
         in.close();
+
+        log.debug(stringBuilder.toString());
+
+        InputStream stringStream = new ByteArrayInputStream(stringBuilder.toString()
+                .getBytes(Charset
+                        .forName("UTF-8")));
+
+        MessageFactory mf = MessageFactory.newInstance();
+        // headers for a SOAP message
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(stringStream);
+        MimeHeaders header = new MimeHeaders();
+        header.addHeader("Content-Type", "text/xml");
+        SOAPMessage soapMessage = mf.createMessage(header,bufferedInputStream);
+
+        SOAPBody soapBody = soapMessage.getSOAPBody();
+        // find your node based on tag name
+        NodeList nodes = soapBody.getElementsByTagName("itk:payload");
+        System.out.println("itk:payload = "+ nodes.getLength());
+
+        nodes = soapBody.getElementsByTagName("getNHSNumberResponse-v1-0");
+        System.out.println("getNHSNumberResponse-v1-0 = "+ nodes.getLength());
+        // check if the node exists and get the value
+        String someMsgContent = null;
+        Node node = nodes.item(0);
+        someMsgContent = node != null ? node.getTextContent() : "";
+
+        System.out.println(someMsgContent);
+
+
         out.close();
         socket.close();
         return new ArrayList<>();

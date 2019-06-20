@@ -48,11 +48,14 @@ public class PatientResourceProvider implements IResourceProvider {
 
     }
 
+    //getPatientDetailsBySearchRequest-v1-0
     @Search
     public List<Patient> search(HttpServletRequest request,
-                                @OptionalParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
-                                @OptionalParam(name = Patient.SP_BIRTHDATE) DateParam dob,
-                                @OptionalParam(name = Patient.SP_NAME) StringParam name
+                                @RequiredParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
+                                @RequiredParam(name = Patient.SP_BIRTHDATE) DateParam dob,
+                                @OptionalParam(name = Patient.SP_GENDER) TokenParam gender,
+                                @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringParam postcode
+
     ) throws Exception {
 
         return patientDao.search(identifier, dob);
