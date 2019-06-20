@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.wildfyre.SMSP.HapiProperties;
 import uk.gov.wildfyre.SMSP.SpineProperties;
-import uk.gov.wildfyre.SMSP.dao.PatientDaoImpl;
+
 
 import javax.net.ssl.*;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class SpineSecuritySocketFactory
     extends javax.net.SocketFactory
 {    
     private static SSLContext context = null;
-    private static Properties properties = null;
+
     private static KeyStore keyStore = null;
     private static KeyStore trustStore = null;
 
@@ -80,7 +80,15 @@ public class SpineSecuritySocketFactory
     {
         init();
     }
-    
+
+    public static KeyStore getKeyStore() {
+        return keyStore;
+    }
+
+    public static KeyStore getTrustStore() {
+        return trustStore;
+    }
+
     /**
      * Constructor which will get configuration properties from the given Properties
      * instance.
@@ -150,7 +158,7 @@ public class SpineSecuritySocketFactory
             if (p == null) p = "";
             keyStore = KeyStore.getInstance("jks");
             if (ksf == null || ksf.isEmpty()) {
-                keyStore.load(getResourceAsStream("cacerts.jks"), SpineProperties.getSSLPASS().toCharArray());
+                keyStore.load(getResourceAsStream("keystore.jks"), SpineProperties.getSSLPASS().toCharArray());
             } else {
                 FileInputStream fis = new FileInputStream(ksf);
                 keyStore.load(fis, p.toCharArray());

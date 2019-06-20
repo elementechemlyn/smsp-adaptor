@@ -3,13 +3,12 @@
 
 From opentest email
 
-https://sslguru.com/knowledgebase.php?action=displayarticle&id=224
+## keystore - my key
+openssl pkcs12 -export -in combined.pem -inkey key.pem -name opentest -out myopentest.p12
 
-combine the certs into a certificate.pem file
+keytool -importkeystore -destkeystore keystore.jks -srckeystore myopentest.p12 -srcstoretype PKCS12
 
-openssl x509 -outform der -in certificate.pem -out certificate.der
-
-keytool -import -alias smsp -keystore cacerts.jks -file certificate.der
+## trusted certs store 
 
 Now need to import the servers certificate into the store to trust it
 
@@ -18,8 +17,11 @@ https://stackoverflow.com/questions/32051596/exception-unable-to-validate-certif
 openssl s_client -connect 192.168.128.11:443 < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > public.crt
 
 (I used the jdk certificate store)
-keytool -import -alias SMSPSRVR -keystore cacerts -file public.crt
+keytool -import -alias SMSPSRVR -keystore cacerts.jks -file public.crt
 
+
+
+### Docker 
 
 In this directory
 

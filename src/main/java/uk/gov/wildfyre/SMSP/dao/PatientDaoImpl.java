@@ -10,13 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.wildfyre.SMSP.HapiProperties;
+import uk.gov.wildfyre.SMSP.support.SSLSocketFactoryGenerator;
 import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
 import uk.hscic.itk.pds.FaultResponse;
 import uk.hscic.itk.pds.VerifyNHSNumberV10;
 import uk.hscic.itk.pds.VerifyNHSNumberV10Ptt;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
@@ -63,6 +66,30 @@ public class PatientDaoImpl {
 
         Socket socket = spineSecurityContext.createSocket(HapiProperties.getNhsServerAddress(),443);
 
+
+        PrintWriter
+                out = new PrintWriter(
+                new BufferedWriter
+                        (
+                        new OutputStreamWriter(
+                                socket.getOutputStream())));
+
+        out.println("GET /smsp/pds HTTP/1.0");
+        out.println();
+        out.flush();
+
+        BufferedReader
+                in = new BufferedReader(
+                new InputStreamReader(
+                        socket.getInputStream()));
+
+        String inputLine;
+        while ((inputLine = in.readLine()) != null)
+            System.out.println(inputLine);
+
+        in.close();
+        out.close();
+        socket.close();
         return new ArrayList<>();
 
     }
@@ -81,6 +108,9 @@ public class PatientDaoImpl {
 
     public void wsVerifyNHSNumber() throws Exception {
 
+
+        SSLSocketFactoryGenerator sslSocketFactoryGenerator = new SSLSocketFactoryGenerator("smspsrvr");
+
         URL wsdlURL = getContextClassLoader().getResource("wsdl/PDSMiniServices-v1-0.wsdl"); //new URL(HapiProperties.getNhsServerUrl());
 
         VerifyNHSNumberV10 ss = new VerifyNHSNumberV10(wsdlURL, VERIFY_NHS_NUMBER_SERVICE_NAME);
@@ -88,7 +118,7 @@ public class PatientDaoImpl {
         VerifyNHSNumberV10Ptt port = ss.getVerifyNHSNumberV10PttPort();
 
         BindingProvider bindingProvider = (BindingProvider) port;
-        bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",spineSecurityContext);
+        bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",sslSocketFactoryGenerator);
         //bindingProvider.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, HapiProperties.getNhsServerUrl());
         bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, HapiProperties.getNhsServerUrl());
 
