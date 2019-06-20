@@ -26,8 +26,9 @@ Convert p12 to PEM (maybe mac OSX only)
 *openssl pkcs12 -in certificate.p12 -out smsp.pem -nodes -clcerts*
 
 then use this to test the certificate (this worked on mac OSX)
+Get the getNHSNumber.xml file from information in the SMSP opentest page
 
-curl -i -X POST -H "SOAPAction: urn:nhs-itk:services:201005:getNHSNumber-v1-0" -H "content-type: text/xml" -E smsp.pem -k https://192.168.128.11/smsp/pds -d @getNHSNumber.xml
+*curl -i -X POST -H "SOAPAction: urn:nhs-itk:services:201005:getNHSNumber-v1-0" -H "content-type: text/xml" -E smsp.pem -k https://192.168.128.11/smsp/pds -d @getNHSNumber.xml*
 
 ### c. JAVA KeyStore
 
@@ -41,10 +42,10 @@ Now need to import the servers certificate into the store to trust it
 
 Re: https://stackoverflow.com/questions/32051596/exception-unable-to-validate-certificate-of-the-target-in-spring-mvc
 
-openssl s_client -connect 192.168.128.11:443 < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > public.crt
+*openssl s_client -connect 192.168.128.11:443 < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > public.crt*
 
-(I used the jdk certificate store)
-keytool -import -alias SMSPSRVR -keystore cacerts.jks -file public.crt
+
+*keytool -import -alias SMSPSRVR -keystore cacerts.jks -file public.crt*
 
 
 
