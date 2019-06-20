@@ -1,12 +1,30 @@
 
 ### Certificates Notes 
 
-From opentest email
 
-## keystore - my key
-openssl pkcs12 -export -in combined.pem -inkey key.pem -name opentest -out myopentest.p12
+## keystore - to prove identity on SSL connection
 
-keytool -importkeystore -destkeystore keystore.jks -srckeystore myopentest.p12 -srcstoretype PKCS12
+Re: https://www.ssl.com/how-to/create-a-pfx-p12-certificate-file-using-openssl/
+
+Store the private key into privateKey.key
+
+Store the certificate (only) into certificate.crt
+
+*openssl pkcs12 -export -out certificate.pfx -inkey privateKey.key -in certificate.crt*
+
+then test with 
+
+following https://digital.nhs.uk/services/spine/spine-mini-service-provider-for-personal-demographics-service/stage-1-getting-started-quick-start
+
+*openssl pkcs12 -in certificate.pfx -out pem_filename.pem -nodes -clcerts*
+
+then use this to test the certificate
+
+curl -i -X POST -H "SOAPAction: urn:nhs-itk:services:201005:getNHSNumber-v1-0" -H "content-type: text/xml" -E pem_filename.pem -k https://192.168.128.11/smsp/pds
+
+
+
+*keytool -importkeystore -destkeystore keystore.jks -srckeystore myopentest.p12 -srcstoretype PKCS12*
 
 ## trusted certs store 
 
