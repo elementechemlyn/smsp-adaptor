@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.sun.xml.ws.developer.JAXWSProperties;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,16 +67,26 @@ public class PatientDaoImpl {
 
         Socket socket = spineSecurityContext.createSocket(HapiProperties.getNhsServerAddress(),443);
 
+        InputStream inputStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getNHSNumber.xml");
 
+        //if (inputStream == null) throw Unsp
         PrintWriter
                 out = new PrintWriter(
                 new BufferedWriter
                         (
                         new OutputStreamWriter(
                                 socket.getOutputStream())));
-
+        String output = IOUtils
+                .toString(inputStream, "UTF-8");
         out.println("POST /smsp/pds HTTP/1.0");
+        out.println("Host: fhirsmsp");
+        out.println("Content-Length: " +output.length());
+        out.println("SOAPAction: urn:nhs-itk:services:201005:getNHSNumber-v1-0");
+        out.println("Content-Type: text/xml");
+
         out.println();
+        out.println(output);
         out.flush();
 
         BufferedReader
@@ -118,7 +129,7 @@ public class PatientDaoImpl {
         VerifyNHSNumberV10Ptt port = ss.getVerifyNHSNumberV10PttPort();
 
         BindingProvider bindingProvider = (BindingProvider) port;
-        bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",sslSocketFactoryGenerator);
+        bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory",spineSecurityContext);
         //bindingProvider.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, HapiProperties.getNhsServerUrl());
         bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, HapiProperties.getNhsServerUrl());
 
