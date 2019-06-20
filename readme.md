@@ -1,10 +1,10 @@
 
-### Certificates Notes 
+# Certificates Notes 
 
 
-## keystore - to prove identity on SSL connection
+## 1 . keystore - to prove identity on SSL connection
 
-## 1. Check certificate works
+### a. Check certificate works
 
 Re: https://www.ssl.com/how-to/create-a-pfx-p12-certificate-file-using-openssl/
 
@@ -19,7 +19,7 @@ then test with
 following https://digital.nhs.uk/services/spine/spine-mini-service-provider-for-personal-demographics-service/stage-1-getting-started-quick-start
 
 
-## MAC (Only???)
+### b. MAC (Only???)
 
 Convert p12 to PEM (maybe mac OSX only) 
 
@@ -29,17 +29,17 @@ then use this to test the certificate (this worked on mac OSX)
 
 curl -i -X POST -H "SOAPAction: urn:nhs-itk:services:201005:getNHSNumber-v1-0" -H "content-type: text/xml" -E smsp.pem -k https://192.168.128.11/smsp/pds -d @getNHSNumber.xml
 
-## JAVA KeyStore
+### c. JAVA KeyStore
 
-Once ok, convert the pem to p12
+Once ok, import the p12 file into java keystore
 
 *keytool -importkeystore -destkeystore keystore.jks -srckeystore certificate.p12 -srcstoretype PKCS12*
 
-## trusted certs store 
+## 2. trusted certs store - to verify identify of server
 
 Now need to import the servers certificate into the store to trust it
 
-https://stackoverflow.com/questions/32051596/exception-unable-to-validate-certificate-of-the-target-in-spring-mvc
+Re: https://stackoverflow.com/questions/32051596/exception-unable-to-validate-certificate-of-the-target-in-spring-mvc
 
 openssl s_client -connect 192.168.128.11:443 < /dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > public.crt
 
@@ -48,7 +48,7 @@ keytool -import -alias SMSPSRVR -keystore cacerts.jks -file public.crt
 
 
 
-### Docker 
+# Docker Build
 
 In this directory
 

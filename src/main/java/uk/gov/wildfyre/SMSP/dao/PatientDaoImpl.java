@@ -74,7 +74,7 @@ public class PatientDaoImpl {
                         new OutputStreamWriter(
                                 socket.getOutputStream())));
 
-        out.println("GET /smsp/pds HTTP/1.0");
+        out.println("POST /smsp/pds HTTP/1.0");
         out.println();
         out.flush();
 
