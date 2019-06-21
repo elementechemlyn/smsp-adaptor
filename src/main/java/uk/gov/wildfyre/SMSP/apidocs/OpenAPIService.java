@@ -1,6 +1,12 @@
 package uk.gov.wildfyre.SMSP.apidocs;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -8,6 +14,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +49,9 @@ public class OpenAPIService {
     private String serverPath;
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OpenAPIService.class);
+
+    public static final String UrlCapabilityStatementRestOperation = "http://hl7.org/fhir/4.0/StructureDefinition/extension-CapabilityStatement.rest.operation";
+
 
     @RequestMapping("/apidocs")
     public String greeting() {
@@ -112,7 +124,27 @@ public class OpenAPIService {
 
         for (CapabilityStatement.CapabilityStatementRestComponent rest : capabilityStatement.getRest()) {
             for (CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent : rest.getResource()) {
+                for (Extension extension : resourceComponent.getExtension()) {
+                    log.info(extension.getUrl());
+                    if (extension.getUrl().equals(UrlCapabilityStatementRestOperation)) {
+                        for (Extension opExtension : extension.getExtension()) {
+                            log.info(opExtension.getUrl());
+                            if (opExtension.getUrl().equals("name")) {
+                                String opName = serverPath +"/STU3/"+resourceComponent.getType()+"/$"+ ((StringType) opExtension.getValue()).getValue();
+                                JSONObject resObj = null;
+                                if (pathMap.containsKey(opName)) {
+                                    resObj = (JSONObject) pathMap.get(opName);
+                                } else {
+                                    resObj = new JSONObject();
+                                    pathMap.put(opName,resObj);
+                                    paths.put(opName,resObj);
+                                }
 
+                                resObj.put("get",getOperation(resourceComponent, ((StringType) opExtension.getValue()).getValue()));
+                            }
+                        }
+                    }
+                }
                 for (CapabilityStatement.ResourceInteractionComponent interactionComponent : resourceComponent.getInteraction()) {
                     JSONObject resObj = null;
                     switch (interactionComponent.getCode()) {
@@ -178,7 +210,106 @@ public class OpenAPIService {
         return retStr;
     }
 
+    private JSONObject getOperation(CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent, String opName) {
+        JSONObject opObj = new JSONObject();
 
+        opObj.put("description","See: "
+                +"<a href=\"https://www.hl7.org/fhir/stu3/operations.html\" target=\"_blank\">FHIR Operations</a> ");
+        JSONArray c = new JSONArray();
+        c.put("application/fhir+json");
+        c.put("application/fhir+xml");
+        opObj.put("consumes", c);
+
+        JSONArray ps = new JSONArray();
+        ps.put("application/fhir+json");
+        ps.put("application/fhir+xml");
+        opObj.put("produces",ps);
+        JSONArray params = new JSONArray();
+        opObj.put("parameters", params);
+
+        JSONObject parm = null;
+
+        switch (opName) {
+            case "getNHSNumber":
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_GENDER);
+                parm.put("in", "path");
+                parm.put("description", "Gender");
+                parm.put("required", true);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_BIRTHDATE);
+                parm.put("in", "path");
+                parm.put("description", "Date of Birth");
+                parm.put("required", true);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_FAMILY);
+                parm.put("in", "path");
+                parm.put("description", "Surname");
+                parm.put("required", true);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_GIVEN);
+                parm.put("in", "path");
+                parm.put("description", "Forename");
+                parm.put("required", false);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_ADDRESS_POSTALCODE);
+                parm.put("in", "path");
+                parm.put("description", "Postcode");
+                parm.put("required", false);
+                parm.put("type","string");
+                break;
+            case "verifyNHSNumber":
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_IDENTIFIER);
+                parm.put("in", "path");
+                parm.put("description", "NHS Number");
+                parm.put("required", true);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_BIRTHDATE);
+                parm.put("in", "path");
+                parm.put("description", "Date of Birth");
+                parm.put("required", true);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_FAMILY);
+                parm.put("in", "path");
+                parm.put("description", "Surname");
+                parm.put("required", false);
+                parm.put("type","string");
+
+                parm = new JSONObject();
+                params.put(parm);
+                parm.put("name",Patient.SP_GIVEN);
+                parm.put("in", "path");
+                parm.put("description", "Forename");
+                parm.put("required", false);
+                parm.put("type","string");
+                break;
+        }
+
+        opObj.put("responses", getResponses());
+        return opObj;
+    }
 
 
     private JSONObject getSearch(CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent,

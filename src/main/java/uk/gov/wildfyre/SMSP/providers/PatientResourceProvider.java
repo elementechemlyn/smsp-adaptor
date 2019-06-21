@@ -40,45 +40,49 @@ public class PatientResourceProvider implements IResourceProvider {
         return Patient.class;
     }
 
+    // Overview of operations https://developer.nhs.uk/apis/smsp/smsp_getting_started.html
 
-    @Read
-    public Patient read(HttpServletRequest request, @IdParam IdType internalId) throws Exception {
-
-        return patientDao.read(internalId);
-
+    @Operation(name = "$verifyNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome verifyNHSNumber(
+        @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier,
+        @RequiredParam(name = Patient.SP_BIRTHDATE) DateParam dob,
+        @OptionalParam(name = Patient.SP_FAMILY) StringParam family,
+        @OptionalParam(name = Patient.SP_GIVEN) StringParam given
+    ) throws Exception {
+        return patientDao.verifyNHSNumber();
     }
 
-    //getPatientDetailsBySearchRequest-v1-0
+    @Operation(name = "$getNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
+    public MethodOutcome getNHSNumber(
+            @RequiredParam(name = Patient.SP_FAMILY) StringParam family,
+            @OptionalParam(name = Patient.SP_GIVEN) StringParam given,
+            @RequiredParam(name = Patient.SP_BIRTHDATE) DateParam dob,
+            @RequiredParam(name = Patient.SP_GENDER) TokenParam gender,
+            @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringParam postcode
+            // BLOCKED ON PURPOSE - NOT SAFE @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam localidentifier
+
+    ) throws Exception {
+        return patientDao.getNHSNumber();
+    }
+
+
+    // getPatientDetailsByNHSNumber
+    // getPatientDetailsBySearch
+    // getPatientDetails
     @Search
     public List<Patient> search(HttpServletRequest request,
-                                @RequiredParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
-                                @RequiredParam(name = Patient.SP_BIRTHDATE) DateParam dob,
+                                // BLOCKED ON PURPOSE - NOT SAFE @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam localidentifier
+                                @OptionalParam(name = Patient.SP_FAMILY) StringParam family,
+                                @OptionalParam(name = Patient.SP_GIVEN) StringParam given,
+                                @OptionalParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
+                                @OptionalParam(name = Patient.SP_BIRTHDATE) DateParam dob,
                                 @OptionalParam(name = Patient.SP_GENDER) TokenParam gender,
                                 @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringParam postcode
 
     ) throws Exception {
 
-        return patientDao.search(identifier, dob);
+        return patientDao.search(family, given, identifier, dob, gender, postcode);
     }
-
-    @Operation(name = "$verifyNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
-    public MethodOutcome getValueCodes(
-    ) throws Exception {
-        return patientDao.verifyNHSNumber();
-    }
-
-    /*
-    @Operation(name = "$nhsNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
-    public MethodOutcome getValueCodes(
-            @OperationParam(name="id") TokenParam valueSetId,
-            @OperationParam(name="query") ReferenceParam valueSetQuery
-
-    ) throws Exception {
-        return null;
-    }
-
-     */
-
 
 
 

@@ -39,6 +39,8 @@ public class ConformanceProvider extends ServerCapabilityStatementProvider {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConformanceProvider.class);
 
+    public static final String UrlCapabilityStatementRestOperation = "http://hl7.org/fhir/4.0/StructureDefinition/extension-CapabilityStatement.rest.operation";
+
 
     public ConformanceProvider() {
         super();
@@ -186,7 +188,7 @@ public class ConformanceProvider extends ServerCapabilityStatementProvider {
 
                         log.trace("Provider Resource - " + provider.getResourceType().getSimpleName());
                         if (restResourceComponent.getType().equals(provider.getResourceType().getSimpleName())
-                                || (restResourceComponent.getType().contains("List") && provider.getResourceType().getSimpleName().contains("List")))
+                                || (restResourceComponent.getType().contains("List") && provider.getResourceType().getSimpleName().contains("List"))) {
                             if (provider instanceof ICCResourceProvider) {
                                 log.trace("ICCResourceProvider - " + provider.getClass());
                                 ICCResourceProvider resourceProvider = (ICCResourceProvider) provider;
@@ -198,6 +200,8 @@ public class ConformanceProvider extends ServerCapabilityStatementProvider {
                                 extension.setUrl("http://hl7api.sourceforge.net/hapi-fhir/res/extdefs.html#resourceCount")
                                         .setValue(new DecimalType(resourceProvider.count()));
                             }
+                        }
+                        getOperations(restResourceComponent, nextRest);
                     }
                 }
             }
@@ -205,6 +209,45 @@ public class ConformanceProvider extends ServerCapabilityStatementProvider {
 
 
         return capabilityStatement;
+    }
+
+
+    private void getOperations(CapabilityStatement.CapabilityStatementRestResourceComponent resource, CapabilityStatement.CapabilityStatementRestComponent rest) {
+// Fix for HAPI putting operations as system level entries
+        if (rest.getOperation() != null) {
+            for (CapabilityStatement.CapabilityStatementRestOperationComponent operationComponent : rest.getOperation()) {
+                if (operationComponent.hasDefinition() && operationComponent.getDefinition().hasReference()) {
+                    String[] elements = operationComponent.getDefinition().getReference().split("-");
+                    if (elements.length > 2) {
+                        log.debug(operationComponent.getDefinition().getReference());
+                        String[] defArray = elements[0].split("/");
+                        if (defArray.length > 1 && defArray[1].equals(resource.getType())) {
+                            log.debug("MATCH");
+                            Extension extension = resource.addExtension()
+                                    .setUrl(UrlCapabilityStatementRestOperation);
+                            extension.addExtension()
+                                    .setUrl("name")
+                                    .setValue(new StringType(operationComponent.getName()));
+                            if (operationComponent.getName().equals("validate")) {
+                                extension.addExtension()
+                                        .setUrl("definition")
+                                        .setValue(new Reference("http://hl7.org/fhir/OperationDefinition/Resource-validate"));
+                            }
+                            if (operationComponent.getName().equals("expand")) {
+                                extension.addExtension()
+                                        .setUrl("definition")
+                                        .setValue(new Reference("http://hl7.org/fhir/OperationDefinition/ValueSet-expand"));
+                            }
+                            if (operationComponent.getName().equals("translate")) {
+                                extension.addExtension()
+                                        .setUrl("definition")
+                                        .setValue(new Reference("http://hl7.org/fhir/OperationDefinition/ConceptMap-translate"));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private HttpClient getHttpClient() {
