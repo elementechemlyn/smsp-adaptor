@@ -42,6 +42,13 @@ public class PatientResourceProvider implements IResourceProvider {
 
     // Overview of operations https://developer.nhs.uk/apis/smsp/smsp_getting_started.html
 
+    // Getting started  https://digital.nhs.uk/services/spine/spine-mini-service-provider-for-personal-demographics-service/stage-1-getting-started-quick-start
+
+
+    /*
+
+    Do we need this??? can just call the other function and get answer back
+
     @Operation(name = "$verifyNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
     public MethodOutcome verifyNHSNumber(
         @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier,
@@ -51,6 +58,10 @@ public class PatientResourceProvider implements IResourceProvider {
     ) throws Exception {
         return patientDao.verifyNHSNumber();
     }
+
+     */
+/*
+Use search instead
 
     @Operation(name = "$getNHSNumber", idempotent = true, bundleType= BundleTypeEnum.COLLECTION)
     public MethodOutcome getNHSNumber(
@@ -64,7 +75,7 @@ public class PatientResourceProvider implements IResourceProvider {
     ) throws Exception {
         return patientDao.getNHSNumber();
     }
-
+*/
 
     // getPatientDetailsByNHSNumber
     // getPatientDetailsBySearch
@@ -75,7 +86,7 @@ public class PatientResourceProvider implements IResourceProvider {
                                 @OptionalParam(name = Patient.SP_FAMILY) StringParam family,
                                 @OptionalParam(name = Patient.SP_GIVEN) StringParam given,
                                 @OptionalParam(name = Patient.SP_IDENTIFIER)  TokenParam identifier,
-                                @OptionalParam(name = Patient.SP_BIRTHDATE) DateParam dob,
+                                @RequiredParam(name = Patient.SP_BIRTHDATE) DateParam dob,
                                 @OptionalParam(name = Patient.SP_GENDER) TokenParam gender,
                                 @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringParam postcode
 
