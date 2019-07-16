@@ -208,9 +208,18 @@ public class ServerInterceptor extends InterceptorAdapter {
         try {
                 MediaType media = MediaType.parseMediaType(contentType);
                 // TODO improve the logic here
-                if (media.getSubtype() != null && !media.getSubtype().contains("xml") && !media.getSubtype().contains("fhir") && !media.getSubtype().contains("json") && !media.getSubtype().contains("plain")) {
+                if (media.getSubtype() != null
+                        && !media.getSubtype().contains("xml")
+                        && !media.getSubtype().contains("fhir")
+                        && !media.getSubtype().contains("json")
+                        && !media.getSubtype().contains("plain")
+                ) {
                     log.debug("Unsupported media type: " + contentType);
-                    throw new InvalidRequestException("Unsupported media type: sub " + contentType);
+                    if (media.getSubtype().contains("x-www-form-urlencoded")) {
+                        return;
+                    } else {
+                        throw new InvalidRequestException("Unsupported media type: sub " + contentType);
+                    }
                 } else {
                     if (!contentType.contains("xml") && !contentType.contains("json")) {
                         log.debug("Unsupported media type: " + contentType);

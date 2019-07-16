@@ -157,15 +157,19 @@ public class PatientDaoImpl {
         if (gender != null) {
             switch (gender.getValue()) {
                 case "M":
+                case "male":
                     output = output.replace("__GENDER__", "1");
                     break;
                 case "F":
+                case "female":
                     output = output.replace("__GENDER__", "2");
                     break;
                 case "O":
+                case "other":
                     output = output.replace("__GENDER__", "9");
                     break;
                 case "U":
+                case "unknown":
                     output = output.replace("__GENDER__", "X");
                     break;
             }
