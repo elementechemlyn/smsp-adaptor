@@ -22,7 +22,7 @@ import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPMessage;
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,14 @@ public class PatientDaoImpl {
     SpineSecuritySocketFactory spineSecurityContext;
 
     private static final Logger log = LoggerFactory.getLogger(PatientDaoImpl.class);
+    
+    private static final String REPLACE_NAME = "__NAME__";
+
+    private static final String REPLACE_GENDER = "__GENDER__";
+
+    private static final String REPLACE_POSTCODE = "__POSTCODE__";
+
+    private static final String REPLACE_NHSNUMBERSUB = "__NHSNUMBERSUB__";
 
      public Patient read(IdType internalId) throws Exception {
 
@@ -99,35 +107,35 @@ public class PatientDaoImpl {
 
 
         String output = IOUtils
-                .toString(inputStream, "UTF-8");
+                .toString(inputStream, StandardCharsets.UTF_8);
         // Build search
 
         if (family != null && given != null) {
             if (given == null) {
-                output = output.replace("__NAME__", "<Person.Name><value><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
+                output = output.replace(REPLACE_NAME, "<Person.Name><value><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
             } else if (family == null) {
-                output = output.replace("__NAME__", "<Person.Name><value><given>__GIVEN__</given></value><semanticsText>Person.Name</semanticsText></Person.Name>");
+                output = output.replace(REPLACE_NAME, "<Person.Name><value><given>__GIVEN__</given></value><semanticsText>Person.Name</semanticsText></Person.Name>");
             } else {
-                output = output.replace("__NAME__", "<Person.Name><value><given>__GIVEN__</given><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
+                output = output.replace(REPLACE_NAME, "<Person.Name><value><given>__GIVEN__</given><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
             }
         } else {
-            output = output.replace("__NAME__", "");
+            output = output.replace(REPLACE_NAME, "");
         }
 
         if (gender != null) {
-            output = output.replace("__GENDER__","<Person.Gender><value code=\"__GENDER__\" codeSystem=\"2.16.840.1.113883.2.1.3.2.4.16.25\"/><semanticsText>Person.Gender</semanticsText></Person.Gender>");
+            output = output.replace(REPLACE_GENDER,"<Person.Gender><value code=\"__GENDER__\" codeSystem=\"2.16.840.1.113883.2.1.3.2.4.16.25\"/><semanticsText>Person.Gender</semanticsText></Person.Gender>");
         } else {
-            output = output.replace("__GENDER__", "");
+            output = output.replace(REPLACE_GENDER, "");
         }
         if (postcode != null) {
-            output = output.replace("__POSTCODE__","<Person.Postcode><value code=\"__POSTCODE__\" /><semanticsText>Person.Postcode</semanticsText></Person.Postcode>");
+            output = output.replace(REPLACE_POSTCODE,"<Person.Postcode><value code=\"__POSTCODE__\" /><semanticsText>Person.Postcode</semanticsText></Person.Postcode>");
         } else {
-            output = output.replace("__POSTCODE__", "");
+            output = output.replace(REPLACE_POSTCODE, "");
         }
         if (addNHSNumber) {
-            output = output.replace("__NHSNUMBERSUB__","<Person.NHSNumber><value root=\"2.16.840.1.113883.2.1.4.1\" extension=\"__NHSNUMBER__\"/><semanticsText>Person.NHSNumber</semanticsText></Person.NHSNumber>");
+            output = output.replace(REPLACE_NHSNUMBERSUB,"<Person.NHSNumber><value root=\"2.16.840.1.113883.2.1.4.1\" extension=\"__NHSNUMBER__\"/><semanticsText>Person.NHSNumber</semanticsText></Person.NHSNumber>");
         } else {
-            output = output.replace("__NHSNUMBERSUB__", "");
+            output = output.replace(REPLACE_NHSNUMBERSUB, "");
         }
 
 
@@ -138,26 +146,26 @@ public class PatientDaoImpl {
             output = output.replace("__DOB__", date);
         }
         if (identifier != null) {
-            log.trace("identifier = "+identifier.getValue());
+            log.trace("identifier = {}", identifier.getValue());
             output = output.replace("__NHSNUMBER__", identifier.getValue());
         }
         if (gender != null) {
             switch (gender.getValue()) {
                 case "M":
                 case "male":
-                    output = output.replace("__GENDER__", "1");
+                    output = output.replace(REPLACE_GENDER, "1");
                     break;
                 case "F":
                 case "female":
-                    output = output.replace("__GENDER__", "2");
+                    output = output.replace(REPLACE_GENDER, "2");
                     break;
                 case "O":
                 case "other":
-                    output = output.replace("__GENDER__", "9");
+                    output = output.replace(REPLACE_GENDER, "9");
                     break;
                 case "U":
                 case "unknown":
-                    output = output.replace("__GENDER__", "X");
+                    output = output.replace(REPLACE_GENDER, "X");
                     break;
                 default :
                     break;
@@ -170,7 +178,7 @@ public class PatientDaoImpl {
             output = output.replace("__GIVEN__", given.getValue());
         }
         if (postcode !=null) {
-            output = output.replace("__POSTCODE__", postcode.getValue());
+            output = output.replace(REPLACE_POSTCODE, postcode.getValue());
         }
         log.debug(output);
 
@@ -201,7 +209,7 @@ public class PatientDaoImpl {
 
 
         String inputLine;
-        Boolean headers = true;
+        boolean headers = true;
         while ((inputLine = in.readLine()) != null) {
             log.trace(inputLine);
             if (headers) {
@@ -220,8 +228,7 @@ public class PatientDaoImpl {
         log.trace(stringBuilder.toString());
 
         InputStream stringStream = new ByteArrayInputStream(stringBuilder.toString()
-                .getBytes(Charset
-                        .forName("UTF-8")));
+                .getBytes(StandardCharsets.UTF_8));
 
         MessageFactory mf = MessageFactory.newInstance();
         // headers for a SOAP message
@@ -392,17 +399,16 @@ public class PatientDaoImpl {
                                                     NodeList gpsubnode = gpnode.item(h).getChildNodes();
 
                                                     for (int i = 0; i < gpsubnode.getLength(); i++) {
-                                                        switch (gpsubnode.item(i).getNodeName()) {
-                                                            case "id":
-                                                                Node idnode = gpsubnode.item(i).getAttributes().getNamedItem("extension");
-                                                                patient.getManagingOrganization()
-                                                                        .getIdentifier()
-                                                                        .setSystem("https://fhir.nhs.uk/Id/ods-organization-code")
-                                                                        .setValue(idnode.getNodeValue());
-                                                                break;
-                                                            case "name":
-                                                                patient.getManagingOrganization().setDisplay(gpsubnode.item(i).getTextContent());
-                                                                break;
+                                                        if (gpsubnode.item(i).getNodeName().equals("id")) {
+                                                            Node idnode = gpsubnode.item(i).getAttributes().getNamedItem("extension");
+                                                            patient.getManagingOrganization()
+                                                                    .getIdentifier()
+                                                                    .setSystem("https://fhir.nhs.uk/Id/ods-organization-code")
+                                                                    .setValue(idnode.getNodeValue());
+                                                        }
+                                                        if (gpsubnode.item(i).getNodeName().equals("name")) {
+
+                                                            patient.getManagingOrganization().setDisplay(gpsubnode.item(i).getTextContent());
                                                         }
                                                     }
                                                 }
@@ -454,7 +460,7 @@ public class PatientDaoImpl {
                                 new OutputStreamWriter(
                                         socket.getOutputStream())));
         String output = IOUtils
-                .toString(inputStream, "UTF-8");
+                .toString(inputStream, StandardCharsets.UTF_8);
 
         log.debug(output);
         out.println("POST /smsp/pds HTTP/1.0");
@@ -477,7 +483,7 @@ public class PatientDaoImpl {
 
 
         String inputLine;
-        Boolean headers = true;
+        boolean headers = true;
         while ((inputLine = in.readLine()) != null) {
             if (headers) {
                 if (inputLine.isEmpty()) {
@@ -495,8 +501,7 @@ public class PatientDaoImpl {
         log.debug(stringBuilder.toString());
 
         InputStream stringStream = new ByteArrayInputStream(stringBuilder.toString()
-                .getBytes(Charset
-                        .forName("UTF-8")));
+                .getBytes(StandardCharsets.UTF_8));
 
         MessageFactory mf = MessageFactory.newInstance();
         // headers for a SOAP message
@@ -508,10 +513,10 @@ public class PatientDaoImpl {
         SOAPBody soapBody = soapMessage.getSOAPBody();
         // find your node based on tag name
         NodeList nodes = soapBody.getElementsByTagName("itk:payload");
-        log.trace("itk:payload = " + nodes.getLength());
+        log.trace("itk:payload = {}", nodes.getLength());
 
         nodes = soapBody.getElementsByTagName("getNHSNumberResponse-v1-0");
-        log.trace("getNHSNumberResponse-v1-0 = " + nodes.getLength());
+        log.trace("getNHSNumberResponse-v1-0 = {}", nodes.getLength());
         // check if the node exists and get the value
         String someMsgContent = null;
         Node node = nodes.item(0);
@@ -533,40 +538,6 @@ public class PatientDaoImpl {
         return null;
     }
 
-    private ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
 
-/*
-    public void wsVerifyNHSNumber() throws Exception {
-
-
-        SSLSocketFactoryGenerator sslSocketFactoryGenerator = new SSLSocketFactoryGenerator("smspsrvr");
-
-        URL wsdlURL = getContextClassLoader().getResource("wsdl/PDSMiniServices-v1-0.wsdl"); //new URL(HapiProperties.getNhsServerUrl());
-
-        VerifyNHSNumberV10 ss = new VerifyNHSNumberV10(wsdlURL, VERIFY_NHS_NUMBER_SERVICE_NAME);
-
-        VerifyNHSNumberV10Ptt port = ss.getVerifyNHSNumberV10PttPort();
-
-        BindingProvider bindingProvider = (BindingProvider) port;
-        bindingProvider.getRequestContext().put("com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory", spineSecurityContext);
-        //bindingProvider.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, HapiProperties.getNhsServerUrl());
-        bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, HapiProperties.getNhsServerUrl());
-
-        log.info("Invoking verifyNHSNumberV10...");
-        uk.hscic.itk.pds.DistributionEnvelopeType _verifyNHSNumberV10_verifyNHSNumberRequestV10 = null;
-        try {
-
-            uk.hscic.itk.pds.DistributionEnvelopeType _verifyNHSNumberV10__return = port.verifyNHSNumberV10(_verifyNHSNumberV10_verifyNHSNumberRequestV10);
-            log.info("verifyNHSNumberV10.result=" + _verifyNHSNumberV10__return);
-
-        } catch (FaultResponse e) {
-            log.error("Expected exception: faultResponse has occurred.");
-            log.error(e.toString());
-        }
-
-    }
-*/
 
 }
