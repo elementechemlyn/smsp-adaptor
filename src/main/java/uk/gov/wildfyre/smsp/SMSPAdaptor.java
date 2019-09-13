@@ -1,9 +1,6 @@
 package uk.gov.wildfyre.smsp;
 
 import ca.uhn.fhir.context.FhirContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,8 +23,6 @@ public class SMSPAdaptor {
     @Autowired
     ApplicationContext context;
 
-    private static final Logger log = LoggerFactory.getLogger(SMSPAdaptor.class);
-
 
     public static void main(String[] args) {
         System.setProperty("hawtio.authenticationEnabled", "false");
@@ -39,7 +34,7 @@ public class SMSPAdaptor {
     }
 
     @Bean
-    public ServletRegistrationBean ServletRegistrationBean() {
+    public ServletRegistrationBean servletRegistrationBean() {
         ServletRegistrationBean registration = new ServletRegistrationBean(new CustomRestfulServer(context), "/STU3/*");
         registration.setName("FhirServlet");
         registration.setLoadOnStartup(1);
@@ -56,40 +51,17 @@ public class SMSPAdaptor {
 
     @Bean
     @Primary
-    public FhirContext FhirContextBean() {
+    public FhirContext fhirContextBean() {
         return FhirContext.forDstu3();
     }
 
 
     @Bean
-    public SpineSecuritySocketFactory spineSecurityContext() throws Exception
+    public SpineSecuritySocketFactory spineSecurityContext()  throws Exception
     {
-        SpineSecuritySocketFactory spineSecuritySocketFactory = new SpineSecuritySocketFactory();
-
-        return spineSecuritySocketFactory;
+        return new SpineSecuritySocketFactory();
     }
 
-
-
-    /*
-        SSLContext sc = SSLContext.getInstance("SSLv3");
-
-        KeyManagerFactory kmf =
-                KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(getResourceAsStream("cacerts.jks"), "fhirsmsp".toCharArray());
-
-        kmf.init(ks, "fhirsmsp".toCharArray());
-
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(ks);
-
-        sc.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-        return sc;
-    }
-*/
 
 
     @Bean

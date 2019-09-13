@@ -32,7 +32,7 @@ public class CustomRestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
     private static final long serialVersionUID = 1L;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CustomRestfulServer.class);
 
-    private ApplicationContext appCtx;
+    private final ApplicationContext appCtx;
 
     CustomRestfulServer(ApplicationContext context) {
         this.appCtx = context;
@@ -99,9 +99,6 @@ public class CustomRestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
         ServerInterceptor loggingInterceptor = new ServerInterceptor(log);
         getInterceptorService().registerInterceptor(loggingInterceptor);
 
-        //ServerInterceptor gatewayInterceptor = new ServerInterceptor(log);
-        //registerInterceptor(gatewayInterceptor);
-
         FifoMemoryPagingProvider pp = new FifoMemoryPagingProvider(10);
         pp.setDefaultPageSize(10);
         pp.setMaximumPageSize(100);
@@ -110,8 +107,7 @@ public class CustomRestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
         setDefaultPrettyPrint(true);
         setDefaultResponseEncoding(EncodingEnum.JSON);
 
-        FhirContext ctx = getFhirContext();
-        // Remove as believe due to issues on docker ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+
     }
 
 

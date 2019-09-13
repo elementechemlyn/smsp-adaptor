@@ -50,8 +50,8 @@ public class SSLSocketFactoryGenerator {
         context.init(keyManagers, trustManagers, null);
 
 
-        SSLSocketFactory ssf=context.getSocketFactory();
-        return ssf;
+        return context.getSocketFactory();
+
     }
 
 
@@ -86,8 +86,8 @@ public class SSLSocketFactoryGenerator {
         kmFact.init(ks, SpineProperties.getSSLPASS().toCharArray());
 
 
-        KeyManager[] kms=kmFact.getKeyManagers();
-        return kms;
+        return kmFact.getKeyManagers();
+
     }
 
 
@@ -102,7 +102,6 @@ public class SSLSocketFactoryGenerator {
 
         tmFact.init(ks);
 
-        TrustManager[] tms=tmFact.getTrustManagers();
-        return tms;
+        return tmFact.getTrustManagers();
     }
 }

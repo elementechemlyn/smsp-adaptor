@@ -9,6 +9,9 @@ import java.util.Properties;
 
 public class SpineProperties {
 
+    private SpineProperties ()  {
+    }
+
     static final String SPINE_PROPERTIES = "spine.properties";
 
     public static final String USESSLCONTEXT = "org.warlock.http.spine.certs";
@@ -113,39 +116,10 @@ public class SpineProperties {
         return null;
     }
 
-    private static String getProperty(String propertyName, String defaultValue) {
-        Properties properties = SpineProperties.getProperties();
 
-        if (properties != null) {
-            String value = properties.getProperty(propertyName);
 
-            if (value != null && value.length() > 0) {
-                return value;
-            }
-        }
 
-        return defaultValue;
-    }
 
-    private static Boolean getBooleanProperty(String propertyName, Boolean defaultValue) {
-        String value = SpineProperties.getProperty(propertyName);
-
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-
-        return Boolean.parseBoolean(value);
-    }
-
-    private static Integer getIntegerProperty(String propertyName, Integer defaultValue) {
-        String value = SpineProperties.getProperty(propertyName);
-
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-
-        return Integer.parseInt(value);
-    }
 
     public static String getSpineProperties() {
         return SpineProperties.getProperty(SPINE_PROPERTIES);

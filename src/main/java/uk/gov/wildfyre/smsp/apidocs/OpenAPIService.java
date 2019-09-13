@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.wildfyre.smsp.HapiProperties;
 
@@ -44,10 +44,10 @@ public class OpenAPIService {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OpenAPIService.class);
 
-    public static final String UrlCapabilityStatementRestOperation = "http://hl7.org/fhir/4.0/StructureDefinition/extension-CapabilityStatement.rest.operation";
+    public static final String URL_CAPABILITYSTATEMENT_REST_OPERATION = "http://hl7.org/fhir/4.0/StructureDefinition/extension-CapabilityStatement.rest.operation";
 
 
-    @RequestMapping("/apidocs")
+    @GetMapping(path = "/apidocs")
     public String greeting() {
         HttpClient client = getHttpClient();
 
@@ -60,7 +60,7 @@ public class OpenAPIService {
         try {
 
             HttpResponse response = client.execute(request);
-            log.trace("Response "+response.getStatusLine().toString());
+            log.trace("Response {}",response.getStatusLine());
             if (response.getStatusLine().toString().contains("200")) {
 
                 String encoding = "UTF-8";
@@ -76,7 +76,7 @@ public class OpenAPIService {
         } catch (UnknownHostException e) {
             log.error("Host not known");
         } catch (IOException ex) {
-            log.error("IO Exception " + ex.getMessage());
+            log.error("IO Exception {}", ex.getMessage());
         }
 
         return "Unable to resolve swagger/openapi documentation from " + apidocs;
@@ -120,7 +120,7 @@ public class OpenAPIService {
             for (CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent : rest.getResource()) {
                 for (Extension extension : resourceComponent.getExtension()) {
                     log.info(extension.getUrl());
-                    if (extension.getUrl().equals(UrlCapabilityStatementRestOperation)) {
+                    if (extension.getUrl().equals(URL_CAPABILITYSTATEMENT_REST_OPERATION)) {
                         for (Extension opExtension : extension.getExtension()) {
                             log.info(opExtension.getUrl());
                             if (opExtension.getUrl().equals("name")) {
@@ -134,13 +134,13 @@ public class OpenAPIService {
                                     paths.put(opName,resObj);
                                 }
 
-                                resObj.put("get",getOperation(resourceComponent, ((StringType) opExtension.getValue()).getValue()));
+                                resObj.put("get",getOperation( ((StringType) opExtension.getValue()).getValue()));
                             }
                         }
                     }
                 }
                 for (CapabilityStatement.ResourceInteractionComponent interactionComponent : resourceComponent.getInteraction()) {
-                    JSONObject resObj = null;
+                    JSONObject resObj;
                     switch (interactionComponent.getCode()) {
                         case READ:
                             if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}")) {
@@ -194,7 +194,8 @@ public class OpenAPIService {
 
                             resObj.put("post",getSearch(resourceComponent, interactionComponent));
                             break;
-
+                        default:
+                            break;
                     }
                 }
             }
@@ -204,7 +205,7 @@ public class OpenAPIService {
         return retStr;
     }
 
-    private JSONObject getOperation(CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent, String opName) {
+    private JSONObject getOperation(String opName) {
         JSONObject opObj = new JSONObject();
 
         opObj.put("description","See: "
@@ -298,6 +299,8 @@ public class OpenAPIService {
                 parm.put("description", "Forename");
                 parm.put("required", false);
                 parm.put("type","string");
+                break;
+            default:
                 break;
         }
 
@@ -408,7 +411,7 @@ public class OpenAPIService {
     }
 
     private HttpClient getHttpClient() {
-        final HttpClient httpClient = HttpClientBuilder.create().build();
-        return httpClient;
+        return HttpClientBuilder.create().build();
+
     }
 }

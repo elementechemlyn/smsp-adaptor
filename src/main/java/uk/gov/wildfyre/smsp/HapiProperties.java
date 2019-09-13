@@ -11,13 +11,17 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class HapiProperties {
+
+    private HapiProperties() {
+
+    }
     static final String ALLOW_EXTERNAL_REFERENCES = "allow_external_references";
     static final String ALLOW_MULTIPLE_DELETE = "allow_multiple_delete";
     static final String ALLOW_PLACEHOLDER_REFERENCES = "allow_placeholder_references";
     static final String REUSE_CACHED_SEARCH_RESULTS_MILLIS = "reuse_cached_search_results_millis";
     static final String DATASOURCE_DRIVER = "datasource.driver";
     static final String DATASOURCE_MAX_POOL_SIZE = "datasource.max_pool_size";
-    static final String DATASOURCE_PASSWORD = "datasource.password";
+
     static final String DATASOURCE_URL = "datasource.url";
     static final String DATASOURCE_USERNAME = "datasource.username";
     static final String DEFAULT_ENCODING = "default_encoding";
@@ -58,7 +62,7 @@ public class HapiProperties {
     static final String VALIDATION_SERVER = "validation.server";
 
     static final String APP_USER = "jolokia.username";
-    static final String APP_PASSWORD = "jolokia.password";
+
 
     static final String HIBERNATE_DIALECT = "hibernate.dialect";
     static final String HIBERNATE_ELASTICSEARCH_HOST = "hibernate.search.default.elasticsearch.host";
@@ -277,10 +281,6 @@ public class HapiProperties {
         return HapiProperties.getProperty(DATASOURCE_USERNAME);
     }
 
-    public static String getDataSourcePassword() {
-        return HapiProperties.getProperty(DATASOURCE_PASSWORD);
-    }
-
     public static Boolean getAllowMultipleDelete() {
         return HapiProperties.getBooleanProperty(ALLOW_MULTIPLE_DELETE, false);
     }
@@ -365,9 +365,6 @@ public class HapiProperties {
         return HapiProperties.getProperty("email.username");
     }
 
-    public static String getEmailPassword() {
-        return HapiProperties.getProperty("email.password");
-    }
 
     public static Long getReuseCachedSearchResultsMillis() {
         String value = HapiProperties.getProperty(REUSE_CACHED_SEARCH_RESULTS_MILLIS, "-1");
@@ -395,9 +392,6 @@ public class HapiProperties {
         return HapiProperties.getProperty(APP_USER);
     }
 
-    public static String getAppPassword() {
-        return HapiProperties.getProperty(APP_PASSWORD);
-    }
 
     public static String getHibernateDialect() {
         return HapiProperties.getProperty(HIBERNATE_DIALECT);

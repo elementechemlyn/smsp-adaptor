@@ -16,7 +16,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import uk.gov.wildfyre.smsp.HapiProperties;
 import uk.gov.wildfyre.smsp.support.SpineSecuritySocketFactory;
-import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPBody;
@@ -37,27 +36,15 @@ public class PatientDaoImpl {
 
     private static final Logger log = LoggerFactory.getLogger(PatientDaoImpl.class);
 
-    private static final QName VERIFY_NHS_NUMBER_SERVICE_NAME = new QName("urn:nhs-itk:ns:201005", "verifyNHSNumber-v1-0");
-
-
-    public Patient read(IdType internalId) throws Exception {
+     public Patient read(IdType internalId) throws Exception {
 
         spineSecurityContext.createContext();
 
         spineSecurityContext.createSocket("192.168.128.11", 443);
-        /*
-        GetPatientDetailsByNHSNumber getPatientDetailsByNHSNumber = new GetPatientDetailsByNHSNumber();
 
-        getPatientDetailsByNHSNumber.callService();
-*/
         return null;
     }
 
-    /*
-
-
-
-     */
 
 
     public List<Patient> search(StringParam family,
@@ -172,6 +159,8 @@ public class PatientDaoImpl {
                 case "unknown":
                     output = output.replace("__GENDER__", "X");
                     break;
+                default :
+                    break;
             }
         }
         if (family != null) {
@@ -285,6 +274,8 @@ public class PatientDaoImpl {
                                     case "family":
                                         name.setFamily(subnode.item(g).getTextContent());
                                         break;
+                                    default:
+                                        break;
                                 }
                             }
                             break;
@@ -307,6 +298,8 @@ public class PatientDaoImpl {
                                     address.setUse(Address.AddressUse.NULL);
                                     address.setType(Address.AddressType.POSTAL);
                                     break;
+                                default:
+                                    break;
                             }
                             for (int g = 0; g < adrnode.getLength(); g++) {
                                 switch (adrnode.item(g).getNodeName()) {
@@ -316,7 +309,8 @@ public class PatientDaoImpl {
                                     case "streetAddressLine":
                                         address.addLine(adrnode.item(g).getTextContent());
                                         break;
-
+                                    default:
+                                        break;
                                 }
                             }
                             break;
@@ -337,6 +331,8 @@ public class PatientDaoImpl {
                                         break;
                                     case "PG" :
                                         contact.setSystem(ContactPoint.ContactPointSystem.PAGER);
+                                        break;
+                                    default:
                                         break;
                                 }
                             }
@@ -373,6 +369,8 @@ public class PatientDaoImpl {
                                                 break;
                                             case "X":
                                                 patient.setGender(Enumerations.AdministrativeGender.UNKNOWN);
+                                                break;
+                                            default:
                                                 break;
                                         }
                                         break;
@@ -411,8 +409,12 @@ public class PatientDaoImpl {
                                             }
                                         }
                                         break;
+                                    default:
+                                        break;
                                 }
                             }
+                            break;
+                        default:
                             break;
                     }
                     node = node.getNextSibling();
