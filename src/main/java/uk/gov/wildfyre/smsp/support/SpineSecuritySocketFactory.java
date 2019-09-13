@@ -14,12 +14,12 @@
    limitations under the License.
  */
 
-package uk.gov.wildfyre.SMSP.support;
+package uk.gov.wildfyre.smsp.support;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.wildfyre.SMSP.HapiProperties;
-import uk.gov.wildfyre.SMSP.SpineProperties;
+import uk.gov.wildfyre.smsp.HapiProperties;
+import uk.gov.wildfyre.smsp.SpineProperties;
 
 
 import javax.net.ssl.*;

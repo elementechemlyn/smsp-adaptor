@@ -1,7 +1,6 @@
-package uk.gov.wildfyre.SMSP.support;
+package uk.gov.wildfyre.smsp.support;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.wildfyre.SMSP.SpineProperties;
+import uk.gov.wildfyre.smsp.SpineProperties;
 
 import java.io.IOException;
 import java.io.InputStream;

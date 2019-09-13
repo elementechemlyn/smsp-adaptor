@@ -14,9 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot-version>2.1.4.RELEASE</spring-boot-version>
-        <hapi-fhir-version>3.8.0</hapi-fhir-version>
-        <care-connect-version>3.5.4</care-connect-version>
-        <camel-version>2.24.0</camel-version>
+        <hapi-fhir-version>4.0.3</hapi-fhir-version>
         <hawtio.version>2.5.0</hawtio.version>
         <cxf.version>3.3.2</cxf.version>
     </properties>
@@ -313,28 +311,7 @@
                     </execution>
                 </executions>
             </plugin>
-      <!--      <plugin>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-codegen-plugin</artifactId>
-                <version>${cxf.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
-                            <wsdlOptions>
-                                <wsdlOption>
-                                    <wsdl>${basedir}/src/main/resources/wsdl/PDSMiniServices-v1-0.wsdl</wsdl>
-                                </wsdlOption>
-                            </wsdlOptions>
-                        </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin> -->
+
         </plugins>
     </build>
 

@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP.dao;
+package uk.gov.wildfyre.smsp.dao;
 
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import uk.gov.wildfyre.SMSP.HapiProperties;
-import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
+import uk.gov.wildfyre.smsp.HapiProperties;
+import uk.gov.wildfyre.smsp.support.SpineSecuritySocketFactory;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;

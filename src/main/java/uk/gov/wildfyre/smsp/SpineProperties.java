@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP;
+package uk.gov.wildfyre.smsp;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import com.google.common.annotations.VisibleForTesting;

@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP.apidocs;
+package uk.gov.wildfyre.smsp.apidocs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

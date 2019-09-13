@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP.support;
+package uk.gov.wildfyre.smsp.support;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;

@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP;
+package uk.gov.wildfyre.smsp;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -12,9 +12,9 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 
-import uk.gov.wildfyre.SMSP.interceptors.ServerInterceptor;
-import uk.gov.wildfyre.SMSP.providers.ConformanceProvider;
-import uk.gov.wildfyre.SMSP.providers.PatientResourceProvider;
+import uk.gov.wildfyre.smsp.interceptors.ServerInterceptor;
+import uk.gov.wildfyre.smsp.providers.ConformanceProvider;
+import uk.gov.wildfyre.smsp.providers.PatientResourceProvider;
 
 
 import javax.servlet.ServletException;
@@ -27,14 +27,14 @@ import java.util.List;
 import java.util.TimeZone;
 
 @WebServlet(urlPatterns = {"/*"}, displayName = "FHIR Server")
-public class RestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
+public class CustomRestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
 
     private static final long serialVersionUID = 1L;
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CustomRestfulServer.class);
 
     private ApplicationContext appCtx;
 
-    RestfulServer(ApplicationContext context) {
+    CustomRestfulServer(ApplicationContext context) {
         this.appCtx = context;
     }
 

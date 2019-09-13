@@ -1,23 +1,19 @@
-package uk.gov.wildfyre.SMSP.providers;
+package uk.gov.wildfyre.smsp.providers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.wildfyre.SMSP.dao.PatientDaoImpl;
+import uk.gov.wildfyre.smsp.dao.PatientDaoImpl;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.Socket;
 import java.util.List;
 
 

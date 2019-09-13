@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP.interceptors;
+package uk.gov.wildfyre.smsp.interceptors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;

@@ -1,6 +1,4 @@
-package uk.gov.wildfyre.SMSP.dao;
-
-import uk.gov.wildfyre.SMSP.HapiProperties;
+package uk.gov.wildfyre.smsp.dao;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocket;

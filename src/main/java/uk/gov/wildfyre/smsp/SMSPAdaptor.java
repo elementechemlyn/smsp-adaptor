@@ -1,4 +1,4 @@
-package uk.gov.wildfyre.SMSP;
+package uk.gov.wildfyre.smsp;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -16,8 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import uk.gov.wildfyre.SMSP.support.CorsFilter;
-import uk.gov.wildfyre.SMSP.support.SpineSecuritySocketFactory;
+import uk.gov.wildfyre.smsp.support.CorsFilter;
+import uk.gov.wildfyre.smsp.support.SpineSecuritySocketFactory;
 
 @SpringBootApplication
 @EnableSwagger2
@@ -40,7 +40,7 @@ public class SMSPAdaptor {
 
     @Bean
     public ServletRegistrationBean ServletRegistrationBean() {
-        ServletRegistrationBean registration = new ServletRegistrationBean(new RestfulServer(context), "/STU3/*");
+        ServletRegistrationBean registration = new ServletRegistrationBean(new CustomRestfulServer(context), "/STU3/*");
         registration.setName("FhirServlet");
         registration.setLoadOnStartup(1);
         return registration;
