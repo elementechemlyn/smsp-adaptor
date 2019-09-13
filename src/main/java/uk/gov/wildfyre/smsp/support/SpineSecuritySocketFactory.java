@@ -111,7 +111,7 @@ public class SpineSecuritySocketFactory
             throws Exception
     {
         log.info("setupTrustStore");
-        try {
+
             String trst = SpineProperties.getUSESSLTRUST();
             if (trst == null) {
 
@@ -135,11 +135,7 @@ public class SpineSecuritySocketFactory
                 trustStore.load(fis, tp.toCharArray());
             }
             fis.close();            
-        }
-        catch (Exception e) {
-            System.err.println(e.toString());
-            throw e;
-        }
+
     }
 
     /**
@@ -166,7 +162,7 @@ public class SpineSecuritySocketFactory
             }
         }
         catch (Exception e) {
-            System.err.println(e.toString());
+
             throw e;
         }
     }
@@ -238,7 +234,7 @@ public class SpineSecuritySocketFactory
             ready = true;
         }
         catch (Exception e) {
-            System.err.println(e.toString());
+
             throw e;
         }
     }
@@ -303,7 +299,7 @@ public class SpineSecuritySocketFactory
     
     @Override
     public java.net.Socket createSocket(String h, int p) 
-            throws java.io.IOException, java.net.UnknownHostException
+            throws java.io.IOException
     {
         SSLSocket s = (SSLSocket)context.getSocketFactory().createSocket(h, p);
         s.startHandshake();
@@ -312,7 +308,7 @@ public class SpineSecuritySocketFactory
 
     @Override
     public java.net.Socket createSocket(String h, int p, java.net.InetAddress la, int lp) 
-            throws java.io.IOException, java.net.UnknownHostException
+            throws java.io.IOException
     {
         SSLSocket s = (SSLSocket)context.getSocketFactory().createSocket(h, p, la, lp);
         s.startHandshake();
@@ -321,7 +317,7 @@ public class SpineSecuritySocketFactory
 
     @Override
     public java.net.Socket createSocket(java.net.InetAddress a, int p) 
-            throws java.io.IOException, java.net.UnknownHostException
+            throws java.io.IOException
     {
         SSLSocket s = (SSLSocket)context.getSocketFactory().createSocket(a, p);
         s.startHandshake();
@@ -330,7 +326,7 @@ public class SpineSecuritySocketFactory
    
     @Override
     public java.net.Socket createSocket(java.net.InetAddress a, int p, java.net.InetAddress la, int lp) 
-            throws java.io.IOException, java.net.UnknownHostException
+            throws java.io.IOException
     {
         SSLSocket s = (SSLSocket)context.getSocketFactory().createSocket(a, p, la, lp);
         s.startHandshake();

@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -16,15 +17,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import uk.gov.wildfyre.smsp.HapiProperties;
 import uk.gov.wildfyre.smsp.support.SpineSecuritySocketFactory;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPMessage;
+
+import javax.xml.soap.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -44,11 +44,7 @@ public class PatientDaoImpl {
 
     private static final String REPLACE_NHSNUMBERSUB = "__NHSNUMBERSUB__";
 
-     public Patient read(IdType internalId) throws Exception {
-
-        spineSecurityContext.createContext();
-
-        spineSecurityContext.createSocket("192.168.128.11", 443);
+     public Patient read()  {
 
         return null;
     }
@@ -63,181 +59,49 @@ public class PatientDaoImpl {
                                 @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringParam postcode) throws Exception {
 
         List<Patient> patients = new ArrayList<>();
-        spineSecurityContext.createContext();
-
-        Socket socket = spineSecurityContext.createSocket(HapiProperties.getNhsServerAddress(), 443);
-
-        InputStream inputStream = null;
-        String soapaction = null;
-
-        Boolean addNHSNumber = false;
-        if (identifier != null && postcode == null) {
-            if (identifier.getSystem() != null && (!identifier.getSystem().equals("https://fhir.nhs.uk/Id/nhs-number"))) {
-                throw new UnprocessableEntityException("Only NHS Number searches are supported.");
-            }
-            if (dob == null) {
-                throw new UnprocessableEntityException("Date of Birth must be supplied with identifier searches");
-            }
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsByNHSNumber.xml");
-            soapaction = "urn:nhs-itk:services:201005:getPatientDetailsByNHSNumber-v1-0";
-        } else {
-
-            if (family == null) {
-                if (gender == null && given == null && postcode == null) {
-                    throw new UnprocessableEntityException("Can not search on just the date of birth");
-                } else {
-                    inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetails.xml");
-                    soapaction = "urn:nhs-itk:services:201005:getPatientDetails-v1-0";
-                    if (identifier !=null) addNHSNumber = true;
-                }
-            } else {
-                if (gender == null) {
-                    throw new UnprocessableEntityException("Gender must be supplied with date of birth and surname search");
-                } else {
-                    inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsBySearch.xml");
-                    soapaction = "urn:nhs-itk:services:201005:getPatientDetailsBySearch-v1-0";
-                }
-            }
-
+        try {
+            spineSecurityContext.createContext();
+        } catch(Exception contextException) {
+            throw new InternalErrorException("Context creation: "+contextException.getMessage());
         }
-        if (inputStream == null) {
+        Socket socket = null;
+        try {
+            socket = spineSecurityContext.createSocket(HapiProperties.getNhsServerAddress(), 443);
+        } catch (IOException ioException) {
+            throw new InternalErrorException("Socket creation: "+ioException.getMessage());
+        }
+
+
+        SoapRequest soapRequest = new SoapRequest(family,
+                given,
+                identifier,
+                dob,
+                gender,
+                postcode);
+
+        soapRequest.prepareRequest();
+
+        if (soapRequest.inputStream == null) {
             throw new UnprocessableEntityException("Unable to match query to SMSP Search");
         }
 
+        soapRequest.output = IOUtils
+                .toString(soapRequest.inputStream, StandardCharsets.UTF_8);
+        //
+        soapRequest.addParameterValues();
 
-
-        String output = IOUtils
-                .toString(inputStream, StandardCharsets.UTF_8);
-        // Build search
-
-        if (family != null && given != null) {
-            if (given == null) {
-                output = output.replace(REPLACE_NAME, "<Person.Name><value><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
-            } else if (family == null) {
-                output = output.replace(REPLACE_NAME, "<Person.Name><value><given>__GIVEN__</given></value><semanticsText>Person.Name</semanticsText></Person.Name>");
-            } else {
-                output = output.replace(REPLACE_NAME, "<Person.Name><value><given>__GIVEN__</given><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
-            }
-        } else {
-            output = output.replace(REPLACE_NAME, "");
+        try {
+            socket = soapRequest.getPrintWriter(socket);
+        } catch (Exception ex) {
+            return Collections.emptyList();
         }
 
-        if (gender != null) {
-            output = output.replace(REPLACE_GENDER,"<Person.Gender><value code=\"__GENDER__\" codeSystem=\"2.16.840.1.113883.2.1.3.2.4.16.25\"/><semanticsText>Person.Gender</semanticsText></Person.Gender>");
-        } else {
-            output = output.replace(REPLACE_GENDER, "");
-        }
-        if (postcode != null) {
-            output = output.replace(REPLACE_POSTCODE,"<Person.Postcode><value code=\"__POSTCODE__\" /><semanticsText>Person.Postcode</semanticsText></Person.Postcode>");
-        } else {
-            output = output.replace(REPLACE_POSTCODE, "");
-        }
-        if (addNHSNumber) {
-            output = output.replace(REPLACE_NHSNUMBERSUB,"<Person.NHSNumber><value root=\"2.16.840.1.113883.2.1.4.1\" extension=\"__NHSNUMBER__\"/><semanticsText>Person.NHSNumber</semanticsText></Person.NHSNumber>");
-        } else {
-            output = output.replace(REPLACE_NHSNUMBERSUB, "");
-        }
+        soapRequest.buildStringBuilder(socket);
 
 
-        // Complete search fields
-        if (dob != null) {
-            String date = dob.getValueAsString().replace("-", "");
+        soapRequest.sendRequest();
 
-            output = output.replace("__DOB__", date);
-        }
-        if (identifier != null) {
-            log.trace("identifier = {}", identifier.getValue());
-            output = output.replace("__NHSNUMBER__", identifier.getValue());
-        }
-        if (gender != null) {
-            switch (gender.getValue()) {
-                case "M":
-                case "male":
-                    output = output.replace(REPLACE_GENDER, "1");
-                    break;
-                case "F":
-                case "female":
-                    output = output.replace(REPLACE_GENDER, "2");
-                    break;
-                case "O":
-                case "other":
-                    output = output.replace(REPLACE_GENDER, "9");
-                    break;
-                case "U":
-                case "unknown":
-                    output = output.replace(REPLACE_GENDER, "X");
-                    break;
-                default :
-                    break;
-            }
-        }
-        if (family != null) {
-            output = output.replace("__FAMILY__", family.getValue());
-        }
-        if (given != null) {
-            output = output.replace("__GIVEN__", given.getValue());
-        }
-        if (postcode !=null) {
-            output = output.replace(REPLACE_POSTCODE, postcode.getValue());
-        }
-        log.debug(output);
-
-        PrintWriter
-                out = new PrintWriter(
-                new BufferedWriter
-                        (
-                                new OutputStreamWriter(
-                                        socket.getOutputStream())));
-
-        out.println("POST /smsp/pds HTTP/1.0");
-        out.println("Host: fhirsmsp");
-        out.println("Content-Length: " + output.length());
-        out.println("SOAPAction: "+soapaction);
-        out.println("Content-Type: text/xml");
-
-        out.println();
-        out.println(output);
-        out.flush();
-
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        BufferedReader
-                in = new BufferedReader(
-                new InputStreamReader(
-                        socket.getInputStream()));
-
-
-        String inputLine;
-        boolean headers = true;
-        while ((inputLine = in.readLine()) != null) {
-            log.trace(inputLine);
-            if (headers) {
-                if (inputLine.isEmpty()) {
-                    headers = false;
-                } else {
-                    log.debug(inputLine);
-                }
-            } else {
-                stringBuilder.append(inputLine);
-            }
-        }
-
-        in.close();
-
-        log.trace(stringBuilder.toString());
-
-        InputStream stringStream = new ByteArrayInputStream(stringBuilder.toString()
-                .getBytes(StandardCharsets.UTF_8));
-
-        MessageFactory mf = MessageFactory.newInstance();
-        // headers for a SOAP message
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(stringStream);
-        MimeHeaders header = new MimeHeaders();
-        header.addHeader("Content-Type", "text/xml");
-        SOAPMessage soapMessage = mf.createMessage(header, bufferedInputStream);
-
-        SOAPBody soapBody = soapMessage.getSOAPBody();
+        SOAPBody soapBody = soapRequest.soapMessage.getSOAPBody();
         // find your node based on tag name
 
         NodeList nodes = soapBody.getElementsByTagName("itk:ErrorDiagnosticText");
@@ -261,7 +125,7 @@ public class PatientDaoImpl {
                             if (id != null) patient.setId(id.getNodeValue());
                             Identifier nhsid = patient.addIdentifier();
                             nhsid.setValue(id.getNodeValue()).setSystem("https://fhir.nhs.uk/Id/nhs-number");
-                            Extension extension = nhsid.addExtension().setUrl("https://fhir.hl7.org.uk/STU3/StructureDefinition/Extension-CareConnect-NHSNumberVerificationStatus-1")
+                            nhsid.addExtension().setUrl("https://fhir.hl7.org.uk/STU3/StructureDefinition/Extension-CareConnect-NHSNumberVerificationStatus-1")
                                     .setValue(new CodeableConcept().addCoding(new Coding().setSystem("https://fhir.hl7.org.uk/STU3/CodeSystem/CareConnect-NHSNumberVerificationStatus-1")
                                             .setCode("01")
                                             .setDisplay("Number present and verified")));
@@ -435,7 +299,7 @@ public class PatientDaoImpl {
         log.debug(someMsgContent);
 
 
-        out.close();
+        soapRequest.out.close();
         socket.close();
         return patients;
 
@@ -446,7 +310,12 @@ public class PatientDaoImpl {
 
         spineSecurityContext.createContext();
 
-        Socket socket = spineSecurityContext.createSocket(HapiProperties.getNhsServerAddress(), 443);
+        Socket socket;
+      //  try {
+            socket = spineSecurityContext.createSocket(HapiProperties.getNhsServerAddress(), 443);
+      //  } catch (Exception ex) {
+      //      throw new InternalErrorException("Socket creation: "+ ex.getMessage());
+      //  }
 
 
         InputStream inputStream =
@@ -498,7 +367,7 @@ public class PatientDaoImpl {
 
         in.close();
 
-        log.debug(stringBuilder.toString());
+        log.debug("{}",stringBuilder);
 
         InputStream stringStream = new ByteArrayInputStream(stringBuilder.toString()
                 .getBytes(StandardCharsets.UTF_8));
@@ -532,12 +401,213 @@ public class PatientDaoImpl {
     }
 
 
-    public MethodOutcome verifyNHSNumber() throws Exception {
 
-  //      wsVerifyNHSNumber();
-        return null;
+    private class SoapRequest {
+        public SoapRequest(StringParam family,
+                           StringParam given,
+                           TokenParam identifier,
+                           DateParam dob,
+                           TokenParam gender,
+                           StringParam postcode) {
+            this.dob = dob;
+            this.family = family;
+            this.given = given;
+            this.identifier = identifier;
+            this.gender = gender;
+            this.postcode = postcode;
+        }
+
+        InputStream inputStream = null;
+
+        StringBuilder stringBuilder;
+        SOAPMessage soapMessage;
+
+        String soapAction = null;
+
+        PrintWriter
+                out;
+
+        StringParam family;
+        StringParam given;
+        TokenParam identifier;
+        DateParam dob;
+        TokenParam gender;
+        StringParam postcode;
+        boolean addNHSNumber = false;
+
+        private String output;
+
+        public void prepareRequest() {
+            this.inputStream = null;
+
+            if (identifier != null && postcode == null) {
+                if (identifier.getSystem() != null && (!identifier.getSystem().equals("https://fhir.nhs.uk/Id/nhs-number"))) {
+                    throw new UnprocessableEntityException("Only NHS Number searches are supported.");
+                }
+                if (dob == null) {
+                    throw new UnprocessableEntityException("Date of Birth must be supplied with identifier searches");
+                }
+                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsByNHSNumber.xml");
+                soapAction = "urn:nhs-itk:services:201005:getPatientDetailsByNHSNumber-v1-0";
+            } else {
+                processRequestDemographics();
+            }
+        }
+
+        private void processRequestDemographics() {
+            if (family == null) {
+                if (gender == null && given == null && postcode == null) {
+                    throw new UnprocessableEntityException("Can not search on just the date of birth");
+                } else {
+                    inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetails.xml");
+                    soapAction = "urn:nhs-itk:services:201005:getPatientDetails-v1-0";
+                    if (identifier != null) addNHSNumber = true;
+                }
+            } else {
+                if (gender == null) {
+                    throw new UnprocessableEntityException("Gender must be supplied with date of birth and surname search");
+                } else {
+                    inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsBySearch.xml");
+                    soapAction = "urn:nhs-itk:services:201005:getPatientDetailsBySearch-v1-0";
+                }
+            }
+        }
+
+        public void addParameterValues() {
+
+            if ((family != null) || given != null) {
+                if (given == null) {
+                    output = output.replace(REPLACE_NAME, "<Person.Name><value><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
+                } else if (family == null) {
+                    output = output.replace(REPLACE_NAME, "<Person.Name><value><given>__GIVEN__</given></value><semanticsText>Person.Name</semanticsText></Person.Name>");
+                } else {
+                    output = output.replace(REPLACE_NAME, "<Person.Name><value><given>__GIVEN__</given><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
+                }
+            } else {
+                output = output.replace(REPLACE_NAME, "");
+            }
+
+            if (gender != null) {
+                output = output.replace(REPLACE_GENDER, "<Person.Gender><value code=\"__GENDER__\" codeSystem=\"2.16.840.1.113883.2.1.3.2.4.16.25\"/><semanticsText>Person.Gender</semanticsText></Person.Gender>");
+            } else {
+                output = output.replace(REPLACE_GENDER, "");
+            }
+            if (postcode != null) {
+                output = output.replace(REPLACE_POSTCODE, "<Person.Postcode><value code=\"__POSTCODE__\" /><semanticsText>Person.Postcode</semanticsText></Person.Postcode>");
+            } else {
+                output = output.replace(REPLACE_POSTCODE, "");
+            }
+            if (addNHSNumber) {
+                output = output.replace(REPLACE_NHSNUMBERSUB, "<Person.NHSNumber><value root=\"2.16.840.1.113883.2.1.4.1\" extension=\"__NHSNUMBER__\"/><semanticsText>Person.NHSNumber</semanticsText></Person.NHSNumber>");
+            } else {
+                output = output.replace(REPLACE_NHSNUMBERSUB, "");
+            }
+            addExtraValues();
+        }
+
+        public void addExtraValues() {
+
+            // Complete search fields
+            if (dob != null) {
+                String date = dob.getValueAsString().replace("-", "");
+
+                output = output.replace("__DOB__", date);
+            }
+            if (identifier != null) {
+                log.trace("identifier = {}", identifier.getValue());
+                output = output.replace("__NHSNUMBER__", identifier.getValue());
+            }
+            if (gender != null) {
+                switch (gender.getValue()) {
+                    case "M":
+                    case "male":
+                        output = output.replace(REPLACE_GENDER, "1");
+                        break;
+                    case "F":
+                    case "female":
+                        output = output.replace(REPLACE_GENDER, "2");
+                        break;
+                    case "O":
+                    case "other":
+                        output = output.replace(REPLACE_GENDER, "9");
+                        break;
+                    case "U":
+                    case "unknown":
+                        output = output.replace(REPLACE_GENDER, "X");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (family != null) {
+                output = output.replace("__FAMILY__", family.getValue());
+            }
+            if (given != null) {
+                output = output.replace("__GIVEN__", given.getValue());
+            }
+            if (postcode != null) {
+                output = output.replace(REPLACE_POSTCODE, postcode.getValue());
+            }
+            log.debug(output);
+        }
+
+        public Socket getPrintWriter(Socket socket) throws Exception {
+            out = new PrintWriter(
+                    new BufferedWriter
+                            (
+                                    new OutputStreamWriter(
+                                            socket.getOutputStream())));
+
+            out.println("POST /smsp/pds HTTP/1.0");
+            out.println("Host: fhirsmsp");
+            out.println("Content-Length: " + output.length());
+            out.println("SOAPAction: " + soapAction);
+            out.println("Content-Type: text/xml");
+
+            out.println();
+            out.println(output);
+            out.flush();
+            return socket;
+        }
+
+        public void sendRequest() throws SOAPException, IOException {
+            InputStream stringStream = new ByteArrayInputStream(stringBuilder.toString()
+                    .getBytes(StandardCharsets.UTF_8));
+
+            MessageFactory mf = MessageFactory.newInstance();
+            // headers for a SOAP message
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(stringStream);
+            MimeHeaders header = new MimeHeaders();
+            header.addHeader("Content-Type", "text/xml");
+            soapMessage = mf.createMessage(header, bufferedInputStream);
+        }
+
+        public void buildStringBuilder(Socket socket) throws IOException {
+
+            BufferedReader in;
+
+                in = new BufferedReader(
+                        new InputStreamReader(
+                                socket.getInputStream()));
+
+                stringBuilder = new StringBuilder();
+                String inputLine;
+                boolean headers = true;
+                while ((inputLine = in.readLine()) != null) {
+                    log.trace(inputLine);
+                    if (headers) {
+                        if (inputLine.isEmpty()) {
+                            headers = false;
+                        } else {
+                            log.debug(inputLine);
+                        }
+                    } else {
+                        stringBuilder.append(inputLine);
+                    }
+                }
+                log.trace("{}", stringBuilder);
+                in.close();
+
+        }
     }
-
-
-
 }
