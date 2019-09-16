@@ -24,7 +24,6 @@ import java.util.TimeZone;
 public class CustomRestfulServer extends ca.uhn.fhir.rest.server.RestfulServer {
 
     private static final long serialVersionUID = 1L;
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CustomRestfulServer.class);
 
     private final ApplicationContext appCtx;
 
