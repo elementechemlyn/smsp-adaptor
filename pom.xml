@@ -37,14 +37,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <repositories>
-        <repository>
-            <id>bintray-kevinmayfield-careconnect</id>
-            <name>kevinmayfield-careconnect</name>
-            <url>https://dl.bintray.com/kevinmayfield/careconnect</url>
-        </repository>
-    </repositories>
-
     <dependencies>
 
         <dependency>

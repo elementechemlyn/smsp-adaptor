@@ -16,9 +16,11 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.wildfyre.smsp.HapiProperties;
+import uk.gov.wildfyre.smsp.support.FhirMediaType;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -44,8 +46,13 @@ public class OpenAPIService {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OpenAPIService.class);
 
-    public static final String URL_CAPABILITYSTATEMENT_REST_OPERATION = "http://hl7.org/fhir/4.0/StructureDefinition/extension-CapabilityStatement.rest.operation";
+    private static final String URL_CAPABILITYSTATEMENT_REST_OPERATION = "http://hl7.org/fhir/4.0/StructureDefinition/extension-CapabilityStatement.rest.operation";
 
+    private static final String FHIR_VERSION = "/STU3/";
+
+    JSONObject paths = null;
+
+    Map pathMap= null;
 
     @GetMapping(path = "/apidocs")
     public String greeting() {
@@ -54,8 +61,8 @@ public class OpenAPIService {
         String apidocs = "http://localhost:"+serverPort+serverPath+"/STU3/metadata";
 
         HttpGet request = new HttpGet(apidocs);
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.setHeader(HttpHeaders.ACCEPT, "application/json");
+        request.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        request.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
         try {
 
@@ -97,7 +104,7 @@ public class OpenAPIService {
         info.put("basePath",serverPath +"/STU3");
         info.put("schemes", new JSONArray().put("http"));
 
-        JSONObject paths = new JSONObject();
+        paths = new JSONObject();
         obj.put("paths",paths);
 
         JSONObject resObjC = new JSONObject();
@@ -107,14 +114,14 @@ public class OpenAPIService {
         opObjC.put("description","FHIR Server Capability Statement");
         opObjC.put("consumes", new JSONArray());
         JSONArray pc = new JSONArray();
-        pc.put("application/fhir+json");
-        pc.put("application/fhir+xml");
+        pc.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        pc.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObjC.put("produces",pc);
         JSONArray paramsC = new JSONArray();
         opObjC.put("parameters", paramsC);
         opObjC.put("responses", getResponses());
 
-        Map pathMap= new HashMap<String, JSONObject>();
+        pathMap = new HashMap<String, JSONObject>();
 
         for (CapabilityStatement.CapabilityStatementRestComponent rest : capabilityStatement.getRest()) {
             for (CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent : rest.getResource()) {
@@ -123,86 +130,83 @@ public class OpenAPIService {
                     if (extension.getUrl().equals(URL_CAPABILITYSTATEMENT_REST_OPERATION)) {
                         for (Extension opExtension : extension.getExtension()) {
                             log.info(opExtension.getUrl());
-                            if (opExtension.getUrl().equals("name")) {
-                                String opName = serverPath +"/STU3/"+resourceComponent.getType()+"/$"+ ((StringType) opExtension.getValue()).getValue();
-                                JSONObject resObj = null;
-                                if (pathMap.containsKey(opName)) {
-                                    resObj = (JSONObject) pathMap.get(opName);
-                                } else {
-                                    resObj = new JSONObject();
-                                    pathMap.put(opName,resObj);
-                                    paths.put(opName,resObj);
-                                }
-
-                                resObj.put("get",getOperation( ((StringType) opExtension.getValue()).getValue()));
-                            }
+                           processName(resourceComponent, opExtension);
                         }
                     }
                 }
-                for (CapabilityStatement.ResourceInteractionComponent interactionComponent : resourceComponent.getInteraction()) {
-                    JSONObject resObj;
-                    switch (interactionComponent.getCode()) {
-                        case READ:
-                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}")) {
-                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}");
-                            } else {
-                                resObj = new JSONObject();
-                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                                paths.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                            }
-                            resObj.put("get",getId(resourceComponent, interactionComponent));
-                            break;
-                        case SEARCHTYPE:
-                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType())) {
-                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType());
-                            } else {
-                                resObj = new JSONObject();
-                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
-                                paths.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
-                            }
-                            resObj.put("get",getSearch(resourceComponent, interactionComponent));
-                            break;
-                        case DELETE:
-                            if (pathMap.containsKey(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}")) {
-                                resObj = (JSONObject) pathMap.get(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}");
-                            } else {
-                                resObj = new JSONObject();
-                                pathMap.put(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                                paths.put(serverPath +"/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                            }
-                            resObj.put("delete",getId(resourceComponent, interactionComponent));
-                            break;
-                        case UPDATE:
-                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}")) {
-                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}");
-                            } else {
-                                resObj = new JSONObject();
-                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                                paths.put(serverPath + "/STU3/"+resourceComponent.getType()+"/{id}",resObj);
-                            }
-                            resObj.put("put",getId(resourceComponent, interactionComponent));
-                            break;
-                        case CREATE:
-
-                            if (pathMap.containsKey(serverPath + "/STU3/"+resourceComponent.getType())) {
-                                resObj = (JSONObject) pathMap.get(serverPath + "/STU3/"+resourceComponent.getType());
-                            } else {
-                                resObj = new JSONObject();
-                                pathMap.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
-                                paths.put(serverPath + "/STU3/"+resourceComponent.getType(),resObj);
-                            }
-
-                            resObj.put("post",getSearch(resourceComponent, interactionComponent));
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                processInteraction(resourceComponent);
             }
         }
         String retStr = obj.toString(2);
         log.trace(retStr);
         return retStr;
+    }
+
+    private void processName(CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent, Extension opExtension) {
+        if (opExtension.getUrl().equals("name")) {
+            String opName = serverPath +FHIR_VERSION+resourceComponent.getType()+"/$"+ ((StringType) opExtension.getValue()).getValue();
+            JSONObject resObj = null;
+            if (pathMap.containsKey(opName)) {
+                resObj = (JSONObject) pathMap.get(opName);
+            } else {
+                resObj = new JSONObject();
+                pathMap.put(opName,resObj);
+                paths.put(opName,resObj);
+            }
+
+            resObj.put("get",getOperation( ((StringType) opExtension.getValue()).getValue()));
+        }
+    }
+
+    private void processInteraction (CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent) {
+        for (CapabilityStatement.ResourceInteractionComponent interactionComponent : resourceComponent.getInteraction()) {
+            switch (interactionComponent.getCode()) {
+                case READ:
+                    processMethodId("get", pathMap, resourceComponent, interactionComponent);
+                    break;
+                case SEARCHTYPE:
+                    processMethodType("get", pathMap, resourceComponent, interactionComponent);
+                    break;
+                case DELETE:
+                    processMethodId("delete", pathMap, resourceComponent, interactionComponent);
+                    break;
+                case UPDATE:
+                    processMethodId("put", pathMap, resourceComponent, interactionComponent);
+                    break;
+                case CREATE:
+                    processMethodType("post", pathMap, resourceComponent, interactionComponent);
+                    break;
+                default:
+            }
+        }
+    }
+
+    private void processMethodId(String method, Map pathMap,
+                                 CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent,
+                                 CapabilityStatement.ResourceInteractionComponent interactionComponent) {
+        JSONObject resObj = null;
+        if (pathMap.containsKey(serverPath + FHIR_VERSION+resourceComponent.getType()+"/{id}")) {
+            resObj = (JSONObject) pathMap.get(serverPath + FHIR_VERSION+resourceComponent.getType()+"/{id}");
+        } else {
+            resObj = new JSONObject();
+            pathMap.put(serverPath + FHIR_VERSION+resourceComponent.getType()+"/{id}",resObj);
+            paths.put(serverPath + FHIR_VERSION+resourceComponent.getType()+"/{id}",resObj);
+        }
+        resObj.put(method,getId(resourceComponent, interactionComponent));
+    }
+    private void processMethodType(String method, Map pathMap,
+                                   CapabilityStatement.CapabilityStatementRestResourceComponent resourceComponent,
+                                   CapabilityStatement.ResourceInteractionComponent interactionComponent) {
+        JSONObject resObj = null;
+        if (pathMap.containsKey(serverPath + FHIR_VERSION+resourceComponent.getType())) {
+            resObj = (JSONObject) pathMap.get(serverPath + FHIR_VERSION+resourceComponent.getType());
+        } else {
+            resObj = new JSONObject();
+            pathMap.put(serverPath + FHIR_VERSION+resourceComponent.getType(),resObj);
+            paths.put(serverPath + FHIR_VERSION+resourceComponent.getType(),resObj);
+        }
+        resObj.put(method,getSearch(resourceComponent, interactionComponent));
+
     }
 
     private JSONObject getOperation(String opName) {
@@ -211,13 +215,13 @@ public class OpenAPIService {
         opObj.put("description","See: "
                 +"<a href=\"https://www.hl7.org/fhir/stu3/operations.html\" target=\"_blank\">FHIR Operations</a> ");
         JSONArray c = new JSONArray();
-        c.put("application/fhir+json");
-        c.put("application/fhir+xml");
+        c.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        c.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObj.put("consumes", c);
 
         JSONArray ps = new JSONArray();
-        ps.put("application/fhir+json");
-        ps.put("application/fhir+xml");
+        ps.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        ps.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObj.put("produces",ps);
         JSONArray params = new JSONArray();
         opObj.put("parameters", params);
@@ -316,13 +320,13 @@ public class OpenAPIService {
         opObj.put("description","For detailed description see: "
          +"<a href=\"https://hl7.org/fhir/stu3/"+resourceComponent.getType()+".html\" target=\"_blank\">FHIR "+resourceComponent.getType()+"</a> ");
         JSONArray c = new JSONArray();
-        c.put("application/fhir+json");
-        c.put("application/fhir+xml");
+        c.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        c.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObj.put("consumes", c);
 
         JSONArray ps = new JSONArray();
-        ps.put("application/fhir+json");
-        ps.put("application/fhir+xml");
+        ps.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        ps.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObj.put("produces",ps);
         JSONArray paramss = new JSONArray();
         opObj.put("parameters", paramss);
@@ -364,12 +368,12 @@ public class OpenAPIService {
                 "For detailed description see: <a href=\"https://hl7.org/fhir/stu3/"+resourceComponent.getType()+".html\" target=\"_blank\">FHIR "+resourceComponent.getType()+"</a> ");
 
         JSONArray c = new JSONArray();
-        c.put("application/fhir+json");
-        c.put("application/fhir+xml");
+        c.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        c.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObj.put("consumes", c);
         JSONArray p = new JSONArray();
-        p.put("application/fhir+json");
-        p.put("application/fhir+xml");
+        p.put(FhirMediaType.APPLICATION_FHIR_JSON_VALUE);
+        p.put(FhirMediaType.APPLICATION_FHIR_XML_VALUE);
         opObj.put("produces",p);
         JSONArray params = new JSONArray();
         opObj.put("parameters", params);
