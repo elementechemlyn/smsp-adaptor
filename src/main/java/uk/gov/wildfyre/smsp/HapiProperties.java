@@ -82,6 +82,13 @@ public class HapiProperties {
     static final String NHS_ASID_FROM = "nhs.ASIDfrom";
     static final String NHS_ASID_TO = "nhs.ASIDto";
 
+    static final String NHS_WSA_FROM = "nhs.WSAFrom";
+    static final String NHS_WSSE_USERNAME = "nhs.WSSEUsername";
+
+    static final String NHS_AUDIT_IDENT_TYPE="nhs.AuditIdentType";
+    static final String NHS_AUDIT_IDENT="nhs.AuditIdent";
+    static final String NHS_ITK_SENDER="nhs.ItkSender";
+    
     private static Properties properties;
 
     public static String getNhsNumber() {
@@ -461,5 +468,25 @@ public class HapiProperties {
 
     public static String getSoftwareImplementationGuide() {
         return HapiProperties.getProperty(SOFTWARE_IMPLEMENTATION_GUIDE);
+    }
+
+    public static String getNhsWsaFrom() {
+        return HapiProperties.getProperty(NHS_WSA_FROM);
+    }
+
+    public static String getNhsWsseUserName() {
+        return HapiProperties.getProperty(NHS_WSSE_USERNAME);
+    }
+
+    public static String getNhsAuditIdent() {
+        return HapiProperties.getProperty(NHS_AUDIT_IDENT);
+    }
+
+    public static String getNhsAuditIdentType() {
+        return HapiProperties.getProperty(NHS_AUDIT_IDENT_TYPE);
+    }
+
+    public static String getNhsItkSender() {
+        return HapiProperties.getProperty(NHS_ITK_SENDER);
     }
 }
