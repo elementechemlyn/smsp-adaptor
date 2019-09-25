@@ -1,0 +1,10 @@
+FROM maven:3.6.2-jdk-11 as buildchain
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY . /usr/src/app
+RUN mvn clean package
+
+FROM openjdk:11-slim
+VOLUME /tmp
+COPY --from=buildchain /usr/src/app/target/smsp-adaptor.jar smsp-adaptor.jar
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/smsp-adaptor.jar"]
