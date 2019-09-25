@@ -5,6 +5,8 @@ COPY . /usr/src/app
 RUN mvn clean package
 
 FROM openjdk:11-slim
+TAG smspadaptor
 VOLUME /tmp
 COPY --from=buildchain /usr/src/app/target/smsp-adaptor.jar smsp-adaptor.jar
+EXPOSE 8187
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/smsp-adaptor.jar"]
