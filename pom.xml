@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.wildfyre</groupId>
     <artifactId>smsp-adaptor</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <name>smsp-adaptor</name>
 
 
@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot-version>2.1.4.RELEASE</spring-boot-version>
-        <hapi-fhir-version>4.0.3</hapi-fhir-version>
+        <hapi-fhir-version>4.2.0</hapi-fhir-version>
         <hawtio.version>2.5.0</hawtio.version>
         <cxf.version>3.3.2</cxf.version>
     </properties>
