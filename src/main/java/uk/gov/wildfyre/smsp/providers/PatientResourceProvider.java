@@ -52,13 +52,13 @@ public class PatientResourceProvider implements IResourceProvider {
                                 @OptionalParam(name = Patient.SP_GENDER) TokenParam gender,
                                 @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringParam postcode
 
-    )  {
-        try {
+    ) throws Exception {
+        //try {
             return patientDao.search(family, given, identifier, dob, gender, postcode);
-        } catch (Exception ex) {
+        //} catch (Exception ex) {
            // Do Nothing
-            return Collections.emptyList();
-        }
+        //    return Collections.emptyList();
+       // }
     }
 
 

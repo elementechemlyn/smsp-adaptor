@@ -14,6 +14,11 @@ import javax.xml.soap.SOAPMessage;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import uk.gov.wildfyre.smsp.HapiProperties;
 
 public class SMSPSoapRequest {
 
@@ -38,7 +43,7 @@ public class SMSPSoapRequest {
                        StringParam postcode) {
         this.dob = dob;
         this.family = family;
-        this.given = given;
+        this.given = given;        
         this.identifier = identifier;
         this.gender = gender;
         this.postcode = postcode;
@@ -63,9 +68,29 @@ public class SMSPSoapRequest {
     boolean addNHSNumber = false;
 
     private String output;
+    private String messageID;
+    private String payloadID;
+    private String trackingID;
+
+    private String toISO8601UTC(ZonedDateTime date) {
+        String formattedString = DateTimeFormatter.ISO_INSTANT.format(date);        
+        return formattedString;
+    }
 
     public String getOutput() {
         return output;
+    }
+
+    public String getMessageId() {
+        return this.messageID;
+    }
+
+    public String getTrackingId() {
+        return this.trackingID;
+    }
+
+    public String getPayloadId() {
+        return this.payloadID;
     }
 
     public void setOutput(String output) {
@@ -75,41 +100,65 @@ public class SMSPSoapRequest {
     public void prepareRequest() {
         this.inputStream = null;
 
-        if (identifier != null && postcode == null) {
-            if (identifier.getSystem() != null && (!identifier.getSystem().equals("https://fhir.nhs.uk/Id/nhs-number"))) {
-                throw new UnprocessableEntityException("Only NHS Number searches are supported.");
-            }
-            if (dob == null) {
-                throw new UnprocessableEntityException("Date of Birth must be supplied with identifier searches");
-            }
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsByNHSNumber.xml");
-            soapAction = "urn:nhs-itk:services:201005:getPatientDetailsByNHSNumber-v1-0";
-        } else {
-            processRequestDemographics();
+        this.messageID = UUID.randomUUID().toString();
+        this.payloadID = UUID.randomUUID().toString();
+        this.trackingID = UUID.randomUUID().toString();
+
+        // All 3 calls require Date of Birth
+        if (dob == null) {
+            throw new UnprocessableEntityException("Date of Birth must be supplied with identifier searches");
         }
+        // If we have an identifer it must by NNN
+        if (identifier != null && identifier.getSystem() != null && (!identifier.getSystem().equals("https://fhir.nhs.uk/Id/nhs-number"))) {
+            throw new UnprocessableEntityException("Only NHS Number searches are supported.");
+        }
+        processRequestDemographics();
     }
 
     private void processRequestDemographics() {
-        if (family == null) {
-            if (gender == null && given == null && postcode == null) {
-                throw new UnprocessableEntityException("Can not search on just the date of birth");
-            } else {
-                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetails.xml");
-                soapAction = "urn:nhs-itk:services:201005:getPatientDetails-v1-0";
-                if (identifier != null) addNHSNumber = true;
-            }
+        if(gender == null && postcode == null){
+            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsByNHSNumber.xml");
+            soapAction = "urn:nhs-itk:services:201005:getPatientDetailsByNHSNumber-v1-0";
         } else {
-            if (gender == null) {
-                throw new UnprocessableEntityException("Gender must be supplied with date of birth and surname search");
+            if (identifier == null) {
+                if ((gender == null) || (family == null)) {
+                    throw new UnprocessableEntityException("Gender must be supplied with date of birth and surname search");
+                } else {
+                    inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsBySearch.xml");
+                    soapAction = "urn:nhs-itk:services:201005:getPatientDetailsBySearch-v1-0";
+                }
             } else {
-                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetailsBySearch.xml");
-                soapAction = "urn:nhs-itk:services:201005:getPatientDetailsBySearch-v1-0";
+                if (gender == null && given == null && postcode == null) {
+                    throw new UnprocessableEntityException("Can not search on just the date of birth");
+                } else {
+                    inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("smsp/getPatientDetails.xml");
+                    soapAction = "urn:nhs-itk:services:201005:getPatientDetails-v1-0";
+                    addNHSNumber = true;
+                }
             }
         }
+    }
+
+    private void addSOAPValues() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+        output = output.replace("__MESSAGEID__", this.messageID);
+        output = output.replace("__TRACKINGID__", this.trackingID);
+        output = output.replace("__MANIFESTID__", this.payloadID);
+        output = output.replace("__PAYLOADID__", this.payloadID);
+        output = output.replace("__WSAACTION__", this.soapAction);
+        output = output.replace("__WSATO__", HapiProperties.getNhsServerAddress());
+        output = output.replace("__WSAFROM__", HapiProperties.getNhsWsaFrom());
+        output = output.replace("__WSUCREATED__", this.toISO8601UTC(now));
+        output = output.replace("__WSUEXPIRES__", this.toISO8601UTC(now.plusMinutes(15)));
+        output = output.replace("__WSSEUSERNAME__", HapiProperties.getNhsWsseUserName());
+        output = output.replace("__AUDITIDENT__", HapiProperties.getNhsAuditIdent());
+        output = output.replace("__AUDITIDENTTYPE__", HapiProperties.getNhsAuditIdentType());
+        output = output.replace("__ITKSENDER__", HapiProperties.getNhsItkSender());
     }
 
     public void addParameterValues() {
 
+        this.addSOAPValues();
         if ((family != null) || given != null) {
             if (given == null) {
                 output = output.replace(REPLACE_NAME, "<Person.Name><value><family>__FAMILY__</family></value><semanticsText>Person.Name</semanticsText></Person.Name>");
